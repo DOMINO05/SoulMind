@@ -9,8 +9,8 @@ export const themes = [
     type: 'nature', 
     heroImage: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070&auto=format&fit=crop",
     colors: {
-      primary: "212 163 115", // #D4A373 (Barna)
-      secondary: "233 237 201", // #E9EDC9 (Zsálya)
+      primary: "212 163 115", 
+      secondary: "233 237 201", 
       dark: "53 53 53", 
       light: "254 250 224", 
     },
@@ -19,30 +19,29 @@ export const themes = [
   },
   {
     id: 2,
-    name: "Üzleti (Kék/Fehér)",
+    name: "Üzleti (Földszínekkel)", // Név frissítve
     type: 'corporate', 
-    // ÚJ KÉP: Stratégiai megbeszélés / Vezetői tréning hangulat
     heroImage: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop",
     colors: {
-      primary: "37 99 235", // #2563EB (Royal Blue)
-      secondary: "241 245 249", 
-      dark: "15 23 42", 
-      light: "255 255 255", 
+      // *** MÁSOLVA AZ 1-ESBŐL ***
+      primary: "212 163 115", 
+      secondary: "233 237 201", 
+      dark: "53 53 53", 
+      light: "254 250 224", 
     },
     fonts: { sans: "Inter", serif: "Inter" }, 
     radii: { btn: "4px", card: "4px" }
   },
   {
-    // Ez volt a 4-es, most lett a 3-as
     id: 3,
     name: "Stabilitás (Mélykék/Ezüst)", 
     type: 'creative', 
     heroImage: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop", 
     colors: {
-      primary: "30 58 138", // #1E3A8A (Dark Blue)
-      secondary: "100 116 139", // #64748B (Slate Blue/Grey)
-      dark: "15 23 42", // #0F172A
-      light: "248 250 252", // #F8FAFC
+      primary: "30 58 138",
+      secondary: "100 116 139",
+      dark: "15 23 42",
+      light: "248 250 252",
     },
     fonts: { sans: "Roboto", serif: "Merriweather" }, 
     radii: { btn: "8px", card: "12px" } 

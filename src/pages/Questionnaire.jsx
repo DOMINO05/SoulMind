@@ -82,7 +82,7 @@ const Questionnaire = () => {
                 <span className="text-sm text-gray-600 group-hover:text-dark transition">
                   Elolvastam és elfogadom az{' '}
                   <a 
-                    href="/adatkezelesi_tajekoztato.pdf" 
+                    href="./adatkezelesi_tajekoztato.pdf" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary font-semibold underline hover:text-dark z-10 relative"

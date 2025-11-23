@@ -14,7 +14,7 @@ const Footer = () => {
           <a href="/kerdoiv" className="text-gray-400 hover:text-primary transition">Jelentkezés</a>
           {/* Itt van a link a Footerben */}
           <a 
-            href="/adatkezelesi_tajekoztato.pdf" 
+            href="./adatkezelesi_tajekoztato.pdf" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-gray-400 hover:text-primary transition"

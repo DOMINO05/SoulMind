@@ -57,7 +57,7 @@ const Home = () => {
   const isCorporate = activeTheme.type === 'corporate';
   
   const heroContainerClass = isCorporate
-    ? "max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center h-full"
+    ? "max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center h-full relative z-10"
     : "relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up";
 
   const getSectionLayout = (index) => {
@@ -72,10 +72,14 @@ const Home = () => {
       <header className={`relative h-[95vh] overflow-hidden flex items-center ${isCorporate ? 'bg-light' : 'justify-center'}`}>
         
         {isCorporate ? (
-           <div className="absolute right-0 top-0 w-1/2 h-full hidden md:block clip-path-slant">
-              <img src={activeTheme.heroImage} className="w-full h-full object-cover" alt="Hero" />
-              <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
-           </div>
+           <>
+             {/* Mobilon felül, Desktopon jobb oldalt */}
+             <div className="absolute md:right-0 top-0 w-full md:w-1/2 h-full clip-path-slant opacity-40 md:opacity-100">
+                <img src={activeTheme.heroImage} className="w-full h-full object-cover" alt="Hero" />
+                {/* Itt nincs sötétítés, mert a kép mellett van a szöveg */}
+                <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+             </div>
+           </>
         ) : (
            <div className="absolute inset-0 z-0">
              <img 
@@ -84,7 +88,7 @@ const Home = () => {
                key={activeTheme.heroImage}
                className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-110"
              />
-             <div className="absolute inset-0 bg-black/50" />
+             <div className="absolute inset-0 bg-black/70" />
            </div>
         )}
 
