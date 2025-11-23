@@ -2,16 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Globális stílus finomhangolások */
+:root {
+  /* TÉMA 1: Eredeti (Földszínek - Barna/Zsálya) */
+  --color-primary: 212 163 115; /* #D4A373 */
+  --color-secondary: 233 237 201; /* #E9EDC9 */
+  --color-accent: 204 213 174;    /* #CCD5AE */
+  --color-dark: 53 53 53;         /* #353535 */
+  --color-light: 254 250 224;     /* #FEFAE0 */
+  
+  --font-sans: 'Inter';
+  --font-serif: 'Playfair Display';
+  
+  --radius-btn: 9999px; /* Full kerek */
+  --radius-card: 1rem;
+}
+
 body {
-  @apply bg-light text-dark font-sans antialiased;
+  @apply bg-light text-dark font-sans antialiased transition-colors duration-500;
 }
 
 h1, h2, h3, h4, h5, h6 {
   @apply font-serif;
 }
 
-/* Egyedi scrollbar */
+/* Gombok és kártyák lekerekítése dinamikusan */
+.rounded-full, .rounded-2xl, .rounded-xl, .rounded-lg {
+  border-radius: var(--radius-btn); 
+}
+/* Kivétel: ha valaminek doboz formájúnak kell lennie a kártyáknál */
+.rounded-xl, .rounded-2xl {
+  border-radius: var(--radius-card);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

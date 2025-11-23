@@ -5,7 +5,7 @@ const Footer = () => {
         <div>
           <h3 className="text-xl font-serif font-bold mb-4 text-primary">SoulMind Academy</h3>
           <p className="text-gray-400 text-sm leading-relaxed">
-            A test és a lélek harmóniájának megteremtése modern eszközökkel és ősi tudással.
+            Ősi önismereti módszerek, mai vezetői kihívásokra adaptálva.
           </p>
         </div>
         <div className="flex flex-col space-y-2 md:items-center">
