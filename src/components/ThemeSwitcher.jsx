@@ -5,7 +5,7 @@ const ThemeSwitcher = () => {
   const { activeTheme, switchTheme } = useTheme();
 
   return (
-    <div className="fixed bottom-6 left-6 z-[9999] flex flex-col gap-2 bg-white/90 backdrop-blur p-3 rounded-2xl shadow-2xl border border-gray-200 animate-fade-in-up transition-all hover:scale-105">
+    <div className="fixed bottom-6 left-6 z-[9999] flex flex-col gap-2 bg-white/50 backdrop-blur p-3 rounded-2xl shadow-2xl border border-gray-200 animate-fade-in-up transition-all hover:scale-105">
       <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 pl-1">
         <Palette size={14} /> Stílus Váltó
       </div>

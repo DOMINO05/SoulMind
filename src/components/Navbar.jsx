@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom'; // useLocation importálása
 import { Menu, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { activeTheme } = useTheme();
+  const location = useLocation(); // Aktuális oldal lekérése
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -12,9 +15,18 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // --- JAVÍTOTT LOGIKA ---
+  // Mikor legyen sötét a szöveg?
+  // 1. Ha görgettünk (scrolled) -> Fehér a háttér, sötét a szöveg.
+  // 2. Ha a 2-es (Üzleti) stílus van -> Ott alapból világos a háttér.
+  // 3. HA NEM A FŐOLDALON VAGYUNK (location.pathname !== '/') -> Admin/Kérdőív oldalon mindig sötét kell.
+  const isDarkText = scrolled || activeTheme.id === 2 || location.pathname !== '/';
+
   const navLinkClass = ({ isActive }) => 
     `text-sm uppercase tracking-widest font-medium transition-colors duration-300 ${
-      isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'
+      isActive 
+        ? 'text-primary font-bold' 
+        : isDarkText ? 'text-gray-600 hover:text-primary' : 'text-gray-200 hover:text-white'
     }`;
 
   return (
@@ -23,7 +35,7 @@ const Navbar = () => {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-serif font-bold text-dark tracking-wider">
+          <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'}`}>
             SoulMind<span className="text-primary">.</span>
           </Link>
           
@@ -34,15 +46,16 @@ const Navbar = () => {
           </div>
 
           <div className="md:hidden">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-dark">
+            <button onClick={() => setIsOpen(!isOpen)} className={isDarkText ? 'text-dark' : 'text-white'}>
               {isOpen ? <X /> : <Menu />}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 px-4 flex flex-col space-y-4">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 px-4 flex flex-col space-y-4 animate-fade-in">
           <Link to="/" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Főoldal</Link>
           <Link to="/kerdoiv" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Kérdőív</Link>
           <Link to="/admin" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Admin</Link>

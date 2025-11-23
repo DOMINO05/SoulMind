@@ -72,15 +72,22 @@ const Home = () => {
       <header className={`relative h-[95vh] overflow-hidden flex items-center ${isCorporate ? 'bg-light' : 'justify-center'}`}>
         
         {isCorporate ? (
+           // 2-es Stílus (Üzleti)
            <>
-             {/* Mobilon felül, Desktopon jobb oldalt */}
-             <div className="absolute md:right-0 top-0 w-full md:w-1/2 h-full clip-path-slant opacity-40 md:opacity-100">
+             {/* DESKTOP: Jobb oldali kép */}
+             <div className="hidden md:block absolute right-0 top-0 w-1/2 h-full clip-path-slant">
                 <img src={activeTheme.heroImage} className="w-full h-full object-cover" alt="Hero" />
-                {/* Itt nincs sötétítés, mert a kép mellett van a szöveg */}
                 <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+             </div>
+             
+             {/* MOBIL: Háttérkép erős fehér fedéssel */}
+             <div className="md:hidden absolute inset-0 z-0">
+                <img src={activeTheme.heroImage} className="w-full h-full object-cover" alt="Hero" />
+                <div className="absolute inset-0 bg-white/90"></div> {/* Erős fehér fedés, hogy a sötét szöveg olvasható legyen */}
              </div>
            </>
         ) : (
+           // 1-es és 3-as Stílus (Normál)
            <div className="absolute inset-0 z-0">
              <img 
                src={activeTheme.heroImage} 
@@ -88,24 +95,30 @@ const Home = () => {
                key={activeTheme.heroImage}
                className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-110"
              />
-             <div className="absolute inset-0 bg-black/70" />
+             <div className="absolute inset-0 bg-black/80" />
            </div>
         )}
 
         <div className={heroContainerClass}>
           <div className={isCorporate ? "z-10 py-20" : ""}>
-            <span className={`uppercase tracking-[0.3em] text-sm font-bold mb-4 block ${isCorporate ? 'text-primary' : 'text-secondary'}`}>
+            {/* KONTRASZT JAVÍTÁS: drop-shadow-md hozzáadva */}
+            <span className={`uppercase tracking-[0.3em] text-sm font-bold mb-4 block drop-shadow-md ${isCorporate ? 'text-primary' : 'text-secondary'}`}>
               {activeTheme.type === 'corporate' ? 'Professzionális Megoldások' : 'Tudatos Vezetés & Önismeret'}
             </span>
-            <h1 className={`text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight ${isCorporate ? 'text-dark' : 'text-white'}`}>
+            
+            {/* KONTRASZT JAVÍTÁS: drop-shadow-lg hozzáadva a címhez */}
+            <h1 className={`text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight drop-shadow-lg ${isCorporate ? 'text-dark' : 'text-white'}`}>
               SoulMind Academy
             </h1>
-            <p className={`text-lg md:text-xl mb-10 font-light leading-relaxed ${isCorporate ? 'text-gray-600' : 'text-gray-200'}`}>
+            
+            {/* KONTRASZT JAVÍTÁS: szöveg szín és árnyék */}
+            <p className={`text-lg md:text-xl mb-10 font-light leading-relaxed drop-shadow-md ${isCorporate ? 'text-gray-800' : 'text-gray-100'}`}>
               Hiteles vezetés pszichológiai alapokon. Fejleszd vezetői kompetenciáidat és önismeretedet szakértőink vezetésével.
             </p>
+            
             <Link 
               to="/kerdoiv" 
-              className={`inline-flex items-center px-8 py-4 rounded-full transition-all duration-300 shadow-xl font-medium border
+              className={`inline-flex items-center px-8 py-4 rounded-full transition-all duration-300 shadow-xl font-medium border backdrop-blur-sm
                 ${isCorporate 
                   ? 'bg-primary text-white hover:bg-dark border-transparent' 
                   : 'bg-primary text-white hover:bg-white hover:text-primary border-primary'
@@ -123,7 +136,6 @@ const Home = () => {
           const items = getItems(section.id);
           const isEven = index % 2 === 0;
 
-          // TRÉNINGEK SZEKCIÓ (Galéria)
           if (section.name === 'Tréningek') {
             return (
               <section key={section.id} className="py-24 bg-white px-4">
@@ -146,7 +158,6 @@ const Home = () => {
                           `}
                           onClick={() => setLightboxImg({ src: train.image_path, alt: train.alt_text })}
                         >
-                          {/* FONTOS VÁLTOZTATÁS: object-contain a teljes megjelenítéshez */}
                           <img 
                             src={train.image_path} 
                             alt={train.alt_text} 
@@ -161,7 +172,6 @@ const Home = () => {
             );
           }
 
-          // ÁLTALÁNOS SZEKCIÓK
           return (
             <section key={section.id} className={`py-24 px-4 ${isEven ? 'bg-light' : 'bg-white'} transition-colors duration-500`}>
               <div className="max-w-6xl mx-auto">
@@ -201,7 +211,7 @@ const Home = () => {
         })}
       </main>
 
-      {/* Lightbox - Itt is object-contain kell */}
+      {/* Lightbox */}
       {lightboxImg && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 animate-fade-in"
