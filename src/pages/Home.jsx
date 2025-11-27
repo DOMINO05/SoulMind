@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ArrowRight, Leaf, Heart, Sun, X, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
 
 const Home = () => {
-  const { activeTheme } = useTheme();
+  // Fix Stabilitás Téma (Style 3)
+  const activeTheme = {
+    type: 'creative',
+    heroImage: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop"
+  };
+  
   const [sections, setSections] = useState([]);
   const [sectionItems, setSectionItems] = useState([]);
   const [trainings, setTrainings] = useState([]);
@@ -173,7 +177,7 @@ const Home = () => {
           }
 
           return (
-            <section key={section.id} className={`py-24 px-4 ${isEven ? 'bg-light' : 'bg-white'} transition-colors duration-500`}>
+            <section key={section.id} className={`py-24 px-4 ${isEven ? 'bg-warm-light' : 'bg-white'} transition-colors duration-500`}>
               <div className="max-w-6xl mx-auto">
                 
                 <div className={activeTheme.type === 'corporate' ? 'block' : 'flex flex-col md:flex-row items-start gap-12'}>

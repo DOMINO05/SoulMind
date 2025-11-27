@@ -13,6 +13,7 @@ export default {
         accent: 'rgb(var(--color-accent) / <alpha-value>)',
         dark: 'rgb(var(--color-dark) / <alpha-value>)',
         light: 'rgb(var(--color-light) / <alpha-value>)',
+        'warm-light': 'rgb(var(--color-warm-light) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'sans-serif'],

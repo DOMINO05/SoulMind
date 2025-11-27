@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom'; // useLocation importálása
 import { Menu, X } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { activeTheme } = useTheme();
   const location = useLocation(); // Aktuális oldal lekérése
 
   useEffect(() => {
@@ -18,9 +16,8 @@ const Navbar = () => {
   // --- JAVÍTOTT LOGIKA ---
   // Mikor legyen sötét a szöveg?
   // 1. Ha görgettünk (scrolled) -> Fehér a háttér, sötét a szöveg.
-  // 2. Ha a 2-es (Üzleti) stílus van -> Ott alapból világos a háttér.
   // 3. HA NEM A FŐOLDALON VAGYUNK (location.pathname !== '/') -> Admin/Kérdőív oldalon mindig sötét kell.
-  const isDarkText = scrolled || activeTheme.id === 2 || location.pathname !== '/';
+  const isDarkText = scrolled || location.pathname !== '/';
 
   const navLinkClass = ({ isActive }) => 
     `text-sm uppercase tracking-widest font-medium transition-colors duration-300 ${
@@ -35,8 +32,9 @@ const Navbar = () => {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
-          <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'}`}>
-            SoulMind<span className="text-primary">.</span>
+          <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'} flex items-center gap-2`}>
+            <img src="/logo.png" alt="SoulMind" className="h-10 w-auto" />
+            <span>SoulMind<span className="text-primary">.</span></span>
           </Link>
           
           <div className="hidden md:flex space-x-10">
