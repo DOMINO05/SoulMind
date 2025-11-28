@@ -60,7 +60,7 @@ const Volumes = () => {
                 className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full hover:-translate-y-2"
               >
                 {/* Kép */}
-                <div className="aspect-[4/3] overflow-hidden bg-gray-50 relative">
+                <div className="aspect-[5/7] overflow-hidden bg-gray-50 relative">
                    {volume.image_path ? (
                      <img 
                        src={volume.image_path} 
