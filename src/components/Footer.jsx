@@ -5,12 +5,13 @@ const Footer = () => {
         <div>
           <h3 className="text-xl font-serif font-bold mb-4 text-primary">SoulMind Academy</h3>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Ősi önismereti módszerek, mai vezetői kihívásokra adaptálva.
+            Önismereti módszerek, mai vezetői kihívásokra alkalmazva.
           </p>
         </div>
         <div className="flex flex-col space-y-2 md:items-center">
           <h4 className="font-bold mb-2">Navigáció</h4>
           <a href="/" className="text-gray-400 hover:text-primary transition">Főoldal</a>
+          <a href="/kotetek" className="text-gray-400 hover:text-primary transition">Kötetek</a>
           <a href="/kerdoiv" className="text-gray-400 hover:text-primary transition">Jelentkezés</a>
           {/* Itt van a link a Footerben */}
           <a 

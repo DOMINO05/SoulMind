@@ -136,7 +136,9 @@ const Home = () => {
       </header>
 
       <main>
-        {sections.map((section, index) => {
+        {sections
+          .filter(section => section.name !== 'A témákhoz kapcsolódó kötetek')
+          .map((section, index) => {
           const items = getItems(section.id);
           const isEven = index % 2 === 0;
 

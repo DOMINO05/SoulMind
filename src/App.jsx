@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Questionnaire from './pages/Questionnaire';
 import Admin from './pages/Admin';
+import Volumes from './pages/Volumes';
 import ScrollToTop from './components/ScrollToTop';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/kotetek" element={<Volumes />} />
             <Route path="/kerdoiv" element={<Questionnaire />} />
             <Route path="/admin" element={<Admin />} />
           </Routes>

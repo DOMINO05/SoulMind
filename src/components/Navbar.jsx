@@ -34,11 +34,11 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'} flex items-center gap-2`}>
             <img src="/logo.png" alt="SoulMind" className="h-10 w-auto" />
-            <span>SoulMind<span className="text-primary">.</span></span>
           </Link>
           
           <div className="hidden md:flex space-x-10">
             <NavLink to="/" className={navLinkClass}>Főoldal</NavLink>
+            <NavLink to="/kotetek" className={navLinkClass}>Kötetek</NavLink>
             <NavLink to="/kerdoiv" className={navLinkClass}>Kérdőív</NavLink>
             <NavLink to="/admin" className={navLinkClass}>Admin</NavLink>
           </div>
@@ -55,6 +55,7 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 px-4 flex flex-col space-y-4 animate-fade-in">
           <Link to="/" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Főoldal</Link>
+          <Link to="/kotetek" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Kötetek</Link>
           <Link to="/kerdoiv" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Kérdőív</Link>
           <Link to="/admin" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Admin</Link>
         </div>

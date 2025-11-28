@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon } from 'lucide-react';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('sections');
-  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [] });
+  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [] });
   const [refresh, setRefresh] = useState(0);
   
   const [uploading, setUploading] = useState(false);
@@ -13,15 +13,29 @@ const Admin = () => {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
 
+  // New Volume State
+  const [newVolume, setNewVolume] = useState({ title: '', link: '' });
+  const [volumeImage, setVolumeImage] = useState(null);
+  const [editingVolumeId, setEditingVolumeId] = useState(null);
+  const [editVolumeData, setEditVolumeData] = useState({ title: '', link: '' });
+
+
   useEffect(() => {
     const load = async () => {
-      const [s, i, t, r] = await Promise.all([
+      const [s, i, t, r, v] = await Promise.all([
         supabase.from('sections').select('*').order('id'),
         supabase.from('section_items').select('*').order('id'),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
-        supabase.from('questionnaire').select('*').order('created_at', { ascending: false })
+        supabase.from('questionnaire').select('*').order('created_at', { ascending: false }),
+        supabase.from('volumes').select('*').order('id')
       ]);
-      setData({ sections: s.data || [], items: i.data || [], trainings: t.data || [], responses: r.data || [] });
+      setData({ 
+        sections: s.data || [], 
+        items: i.data || [], 
+        trainings: t.data || [], 
+        responses: r.data || [],
+        volumes: v.data || []
+      });
     };
     load();
   }, [refresh]);
@@ -37,8 +51,13 @@ const Admin = () => {
 
   const deleteItem = async (table, id) => {
     if(confirm('Biztosan törlöd?')) {
-      await supabase.from(table).delete().eq('id', id);
-      triggerRefresh();
+      const { error } = await supabase.from(table).delete().eq('id', id);
+      if (error) {
+        console.error("Delete error:", error);
+        alert("Hiba történt a törléskor.");
+      } else {
+        triggerRefresh();
+      }
     }
   };
 
@@ -82,6 +101,67 @@ const Admin = () => {
     }
   };
 
+  // --- VOLUMES CRUD ---
+  const handleVolumeImageUpload = async (file) => {
+    if (!file) return null;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `volumes/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
+    if (uploadError) throw uploadError;
+    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+    return publicUrl;
+  };
+
+  const addVolume = async () => {
+    if (!newVolume.title.trim()) return alert("A cím megadása kötelező!");
+    
+    setUploading(true);
+    try {
+      let imageUrl = null;
+      if (volumeImage) {
+        imageUrl = await handleVolumeImageUpload(volumeImage);
+      }
+
+      const { error } = await supabase.from('volumes').insert({
+        title: newVolume.title,
+        link: newVolume.link,
+        image_path: imageUrl
+      });
+
+      if (error) throw error;
+      
+      setNewVolume({ title: '', link: '' });
+      setVolumeImage(null);
+      triggerRefresh();
+    } catch (error) {
+      console.error("Hiba a kötet hozzáadásakor:", error);
+      alert("Hiba történt mentéskor.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const startEditingVolume = (vol) => {
+    setEditingVolumeId(vol.id);
+    setEditVolumeData({ title: vol.title, link: vol.link });
+  };
+
+  const updateVolume = async (id) => {
+    if (!editVolumeData.title.trim()) return;
+    try {
+      const { error } = await supabase.from('volumes')
+        .update({ title: editVolumeData.title, link: editVolumeData.link })
+        .eq('id', id);
+        
+      if (error) throw error;
+      setEditingVolumeId(null);
+      triggerRefresh();
+    } catch (error) {
+       console.error("Update error:", error);
+       alert("Hiba történt frissítéskor.");
+    }
+  };
+
   // FIX KEREKÍTÉS: rounded-t-[10px] a rounded-t-lg helyett
   const TabButton = ({ id, label, icon: Icon }) => (
     <button 
@@ -108,8 +188,9 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
         
         {/* FIX KEREKÍTÉS: rounded-t-[12px] */}
-        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px]">
+        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] overflow-x-auto">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
+          <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
           <TabButton id="responses" label="Jelentkezők" icon={Users} />
         </div>
@@ -119,7 +200,7 @@ const Admin = () => {
           {/* TARTALOM SZERKESZTŐ */}
           {activeTab === 'sections' && (
             <div className="grid gap-8">
-              {data.sections.filter(s => s.name !== 'Tréningek').map(sec => (
+              {data.sections.filter(s => s.name !== 'Tréningek' && s.name !== 'A témákhoz kapcsolódó kötetek').map(sec => (
                 // FIX KEREKÍTÉS: rounded-[8px]
                 <div key={sec.id} className="bg-gray-50 p-4 md:p-6 rounded-[8px] border border-gray-200 transition-all hover:shadow-md">
                   <h3 className="text-xl font-bold text-dark mb-4 pb-2 border-b border-gray-200 flex items-center gap-2">
@@ -167,6 +248,108 @@ const Admin = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* KÖTETEK KEZELÉSE */}
+          {activeTab === 'volumes' && (
+            <div className="space-y-8">
+              {/* Új kötet hozzáadása */}
+              <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100">
+                <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új kötet hozzáadása</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input 
+                    type="text" 
+                    placeholder="Kötet címe" 
+                    value={newVolume.title}
+                    onChange={(e) => setNewVolume({...newVolume, title: e.target.value})}
+                    className="border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Link (URL)" 
+                    value={newVolume.link}
+                    onChange={(e) => setNewVolume({...newVolume, link: e.target.value})}
+                    className="border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <div className="md:col-span-2 flex items-center gap-4">
+                     <label className="flex-1 cursor-pointer bg-white border border-blue-200 text-blue-700 px-4 py-2 rounded-[4px] hover:bg-blue-100 transition flex items-center justify-center gap-2">
+                        <ImageIcon size={18} />
+                        {volumeImage ? volumeImage.name : "Borítókép kiválasztása"}
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => setVolumeImage(e.target.files[0])} />
+                     </label>
+                     <button 
+                       onClick={addVolume} 
+                       disabled={uploading}
+                       className={`bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     >
+                       {uploading ? 'Feltöltés...' : 'Hozzáadás'}
+                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista */}
+              <div className="grid gap-4">
+                {data.volumes.map(vol => (
+                  <div key={vol.id} className="bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+                    
+                    {/* Kép */}
+                    <div className="w-20 h-28 bg-gray-100 rounded-[4px] overflow-hidden flex-shrink-0">
+                      {vol.image_path ? (
+                        <img src={vol.image_path} alt={vol.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300"><Book size={24}/></div>
+                      )}
+                    </div>
+
+                    {/* Tartalom */}
+                    <div className="flex-grow w-full">
+                       {editingVolumeId === vol.id ? (
+                         <div className="grid gap-2">
+                           <input 
+                             type="text" 
+                             value={editVolumeData.title} 
+                             onChange={(e) => setEditVolumeData({...editVolumeData, title: e.target.value})}
+                             className="border border-primary rounded-[4px] px-3 py-1 w-full"
+                           />
+                           <input 
+                             type="text" 
+                             value={editVolumeData.link} 
+                             onChange={(e) => setEditVolumeData({...editVolumeData, link: e.target.value})}
+                             className="border border-gray-300 rounded-[4px] px-3 py-1 w-full text-sm"
+                           />
+                           <div className="flex gap-2 mt-2">
+                             <button onClick={() => updateVolume(vol.id)} className="bg-green-50 text-green-600 px-3 py-1 rounded-[4px] text-sm hover:bg-green-100 flex items-center gap-1"><Check size={14}/> Mentés</button>
+                             <button onClick={() => setEditingVolumeId(null)} className="bg-gray-50 text-gray-500 px-3 py-1 rounded-[4px] text-sm hover:bg-gray-100 flex items-center gap-1"><X size={14}/> Mégse</button>
+                           </div>
+                         </div>
+                       ) : (
+                         <div>
+                           <h4 className="font-bold text-dark text-lg">{vol.title}</h4>
+                           {vol.link && (
+                             <a href={vol.link} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline flex items-center gap-1 mt-1">
+                               <LinkIcon size={12} /> {vol.link}
+                             </a>
+                           )}
+                         </div>
+                       )}
+                    </div>
+
+                    {/* Műveletek */}
+                    <div className="flex gap-2 self-end md:self-center">
+                      {editingVolumeId !== vol.id && (
+                        <>
+                          <button onClick={() => startEditingVolume(vol)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-[4px] transition"><Edit2 size={18} /></button>
+                          <button onClick={() => deleteItem('volumes', vol.id)} className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-[4px] transition"><Trash2 size={18}/></button>
+                        </>
+                      )}
+                    </div>
+
+                  </div>
+                ))}
+                {data.volumes.length === 0 && <p className="text-center text-gray-500 py-8">Még nincs feltöltött kötet.</p>}
+              </div>
             </div>
           )}
 
