@@ -16,8 +16,9 @@ const Navbar = () => {
   // --- JAVÍTOTT LOGIKA ---
   // Mikor legyen sötét a szöveg?
   // 1. Ha görgettünk (scrolled) -> Fehér a háttér, sötét a szöveg.
+  // 2. Ha nyitva a menü (isOpen) -> Fehér háttér, sötét szöveg.
   // 3. HA NEM A FŐOLDALON VAGYUNK (location.pathname !== '/') -> Admin/Kérdőív oldalon mindig sötét kell.
-  const isDarkText = scrolled || location.pathname !== '/';
+  const isDarkText = scrolled || isOpen || location.pathname !== '/';
 
   const navLinkClass = ({ isActive }) => 
     `text-sm uppercase tracking-widest font-medium transition-colors duration-300 ${
@@ -26,10 +27,13 @@ const Navbar = () => {
         : isDarkText ? 'text-gray-600 hover:text-primary' : 'text-gray-200 hover:text-white'
     }`;
 
+  // Háttér logika: Görgetésnél VAGY nyitott menünél legyen fehér alap
+  const showWhiteBg = scrolled || isOpen;
+
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'
-    }`}>
+      showWhiteBg ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
+    } ${scrolled ? 'py-4' : 'py-6'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'} flex items-center gap-2`}>
