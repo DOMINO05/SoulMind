@@ -33,7 +33,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'} flex items-center gap-2`}>
-            <img src="/logo.png" alt="SoulMind" className="h-10 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="SoulMind" className="h-[3.75rem] w-auto" />
           </Link>
           
           <div className="hidden md:flex space-x-10">

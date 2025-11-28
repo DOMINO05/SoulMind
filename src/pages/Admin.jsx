@@ -188,7 +188,7 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
         
         {/* FIX KEREKÍTÉS: rounded-t-[12px] */}
-        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] overflow-x-auto">
+        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px]">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
           <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
