@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
+import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
+  const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('sections');
   const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [] });
   const [refresh, setRefresh] = useState(0);
@@ -189,11 +191,23 @@ const Admin = () => {
       <div className="max-w-7xl mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
         
         {/* FIX KEREKÍTÉS: rounded-t-[12px] */}
-        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px]">
+        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] flex-wrap items-center">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
           <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
           <TabButton id="responses" label="Jelentkezők" icon={Users} />
+          
+          <div className="ml-auto p-2 flex items-center gap-4">
+            <span className="text-xs text-gray-500 hidden md:inline">{user?.email}</span>
+            <button 
+              onClick={signOut} 
+              className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition text-sm font-bold"
+              title="Kijelentkezés"
+            >
+              <LogOut size={16} />
+              <span className="hidden sm:inline">Kilépés</span>
+            </button>
+          </div>
         </div>
 
         <div key={activeTab} className="p-4 md:p-8 flex-grow animate-fade-in">

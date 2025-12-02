@@ -8,7 +8,7 @@ const FloatingCTA = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Csak a főoldalon legyen görgetéshez kötve, máshol mindig látszik (ha nincs tiltva)
+      // Csak a főoldalon legyen görgetéshez kötve
       if (location.pathname === '/') {
         setVisible(window.scrollY > 300);
       } else {
@@ -26,8 +26,7 @@ const FloatingCTA = () => {
   // Ne jelenjen meg a Jelentkezés oldalon és az Admin felületen
   if (['/jelentkezes', '/admin'].includes(location.pathname)) return null;
 
-  // Ha nem látható (pl. főoldal tetején), akkor ne rendereljen semmit (vagy animálva tűnjön el)
-  // Itt most egyszerűen null-t adunk vissza, de lehetne opacity transition is.
+  // Ha nem látható, akkor ne rendereljen semmit
   if (!visible) return null;
 
   return (
