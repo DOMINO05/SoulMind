@@ -69,6 +69,8 @@ const Home = () => {
     return 'flex flex-col md:flex-row items-start gap-12'; 
   };
 
+  const ctaTexts = ["Jelentkezem", "Érdekel", "Csatlakozom", "Részletek"];
+
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500">
       
@@ -215,7 +217,7 @@ const Home = () => {
                         to="/jelentkezes" 
                         className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-white font-bold hover:bg-dark transition-all duration-300 shadow-md hover:shadow-lg text-sm tracking-wide group"
                       >
-                        Jelentkezem <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        {ctaTexts[index % ctaTexts.length]} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </Link>
                     </div>
                   </div>
