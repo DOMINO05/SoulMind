@@ -6,6 +6,7 @@ import Application from './pages/Application';
 import Admin from './pages/Admin';
 import Volumes from './pages/Volumes';
 import ScrollToTop from './components/ScrollToTop';
+import FloatingCTA from './components/FloatingCTA';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <FloatingCTA />
       </div>
     </HashRouter>
   );
