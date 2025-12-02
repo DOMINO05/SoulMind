@@ -61,8 +61,8 @@ const Home = () => {
   const isCorporate = activeTheme.type === 'corporate';
   
   const heroContainerClass = isCorporate
-    ? "max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center h-full relative z-10"
-    : "relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up";
+    ? "max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center h-full relative z-10 pt-20"
+    : "relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up pt-24";
 
   const getSectionLayout = (index) => {
     if (activeTheme.type === 'corporate') return 'grid md:grid-cols-3 gap-8';
