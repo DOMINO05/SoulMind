@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
   return (
     <footer className="bg-dark text-white py-12 border-t border-primary/20">
@@ -10,9 +12,9 @@ const Footer = () => {
         </div>
         <div className="flex flex-col space-y-2 md:items-center">
           <h4 className="font-bold mb-2">Navigáció</h4>
-          <a href="/" className="text-gray-400 hover:text-primary transition">Főoldal</a>
-          <a href="/kotetek" className="text-gray-400 hover:text-primary transition">Kötetek</a>
-          <a href="/kerdoiv" className="text-gray-400 hover:text-primary transition">Jelentkezés</a>
+          <Link to="/" className="text-gray-400 hover:text-primary transition">Főoldal</Link>
+          <Link to="/kotetek" className="text-gray-400 hover:text-primary transition">Kötetek</Link>
+          <Link to="/jelentkezes" className="text-gray-400 hover:text-primary transition">Jelentkezés</Link>
           {/* Itt van a link a Footerben */}
           <a 
             href="./adatkezelesi_tajekoztato.pdf" 

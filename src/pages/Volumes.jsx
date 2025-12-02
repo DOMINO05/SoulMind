@@ -51,43 +51,52 @@ const Volumes = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {volumes.map((volume) => (
-              <a
-                key={volume.id}
-                href={volume.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full hover:-translate-y-2"
-              >
-                {/* Kép */}
-                <div className="aspect-[5/7] overflow-hidden bg-gray-50 relative">
-                   {volume.image_path ? (
-                     <img 
-                       src={volume.image_path} 
-                       alt={volume.title} 
-                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                     />
-                   ) : (
-                     <div className="w-full h-full flex items-center justify-center text-gray-300">
-                       <Book size={64} />
-                     </div>
-                   )}
-                   <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300"></div>
-                </div>
+            {volumes.map((volume) => {
+              const hasLink = !!volume.link;
+              const Tag = hasLink ? 'a' : 'div';
+              const props = hasLink ? {
+                href: volume.link,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full hover:-translate-y-2 cursor-pointer"
+              } : {
+                className: "bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col h-full"
+              };
 
-                {/* Szöveg */}
-                <div className="p-6 flex-grow flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold text-dark mb-2 group-hover:text-primary transition-colors">
-                      {volume.title}
-                    </h3>
+              return (
+                <Tag key={volume.id} {...props}>
+                  {/* Kép */}
+                  <div className="aspect-[5/7] overflow-hidden bg-gray-50 relative group">
+                     {volume.image_path ? (
+                       <img 
+                         src={volume.image_path} 
+                         alt={volume.title} 
+                         className={`w-full h-full object-cover transition-transform duration-700 ${hasLink ? 'group-hover:scale-105' : ''}`}
+                       />
+                     ) : (
+                       <div className="w-full h-full flex items-center justify-center text-gray-300">
+                         <Book size={64} />
+                       </div>
+                     )}
+                     {hasLink && <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300"></div>}
                   </div>
-                  <div className="mt-4 text-sm font-medium text-primary uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                    Megtekintés &rarr;
+
+                  {/* Szöveg */}
+                  <div className="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                      <h3 className={`text-xl font-bold text-dark mb-2 transition-colors ${hasLink ? 'group-hover:text-primary' : ''}`}>
+                        {volume.title}
+                      </h3>
+                    </div>
+                    {hasLink && (
+                      <div className="mt-4 text-sm font-medium text-primary uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                        Megtekintés &rarr;
+                      </div>
+                    )}
                   </div>
-                </div>
-              </a>
-            ))}
+                </Tag>
+              );
+            })}
           </div>
         )}
       </div>

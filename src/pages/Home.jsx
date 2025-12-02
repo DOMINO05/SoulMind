@@ -121,7 +121,7 @@ const Home = () => {
             </p>
             
             <Link 
-              to="/kerdoiv" 
+              to="/jelentkezes" 
               className={`inline-flex items-center px-8 py-4 rounded-full transition-all duration-300 shadow-xl font-medium border backdrop-blur-sm
                 ${isCorporate 
                   ? 'bg-primary text-white hover:bg-dark border-transparent' 
@@ -206,7 +206,7 @@ const Home = () => {
                         }
                         rounded-xl
                       `}>
-                        <p className="text-lg leading-relaxed font-light text-gray-700">{item.content}</p>
+                        <p className="text-xl leading-relaxed font-medium text-gray-800">{item.content}</p>
                       </div>
                     ))}
                   </div>

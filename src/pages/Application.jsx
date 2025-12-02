@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
-const Questionnaire = () => {
+const Application = () => {
   const [formData, setFormData] = useState({
     full_name: '', phone: '', email: '', interests: '', gdpr: false
   });
@@ -33,8 +33,8 @@ const Questionnaire = () => {
       {/* Itt a fade-in-up animáció a konténeren */}
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden border border-gray-100 animate-fade-in-up">
         <div className="bg-primary p-8 text-center">
-          <h2 className="text-3xl font-serif font-bold text-white">Kérdőív</h2>
-          <p className="text-white/90 mt-2 font-light">Jelentkezz a következő vezetői csoportunkba.</p>
+          <h2 className="text-3xl font-serif font-bold text-white">Jelentkezés</h2>
+          <p className="text-white/90 mt-2 font-light">Csatlakozz a következő vezetői csoportunkhoz.</p>
         </div>
         
         <div className="p-8">
@@ -108,4 +108,4 @@ const Questionnaire = () => {
   );
 };
 
-export default Questionnaire;
+export default Application;
