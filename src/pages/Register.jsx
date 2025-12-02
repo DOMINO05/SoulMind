@@ -14,15 +14,17 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Secret Code Validation
-    if (secretCode !== '55555') {
-      return setError('Hibás adminisztrátori jelszó!');
-    }
-
     setLoading(true);
     
-    const { error: signUpError } = await signUp({ email, password });
+    const { error: signUpError } = await signUp({ 
+      email, 
+      password,
+      options: {
+        data: {
+          admin_secret: secretCode
+        }
+      }
+    });
     
     if (signUpError) {
       setError(signUpError.message); // Jobb hibaüzenet
