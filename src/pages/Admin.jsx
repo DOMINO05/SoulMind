@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
   const { signOut, user } = useAuth();
-  const [activeTab, setActiveTab] = useState('sections');
+  const [activeTab, setActiveTab] = useState('responses');
   const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [] });
   const [refresh, setRefresh] = useState(0);
   
