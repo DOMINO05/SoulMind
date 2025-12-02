@@ -33,11 +33,11 @@ const Navbar = () => {
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
       showWhiteBg ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
-    } ${scrolled ? 'py-4' : 'py-6'}`}>
+    } ${scrolled ? 'pt-2 pb-4' : 'pt-4 pb-8'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'} flex items-center gap-2`}>
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="SoulMind" className="h-24 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="SoulMind" className="h-28 w-auto" />
           </Link>
           
           <div className="hidden md:flex space-x-10 items-center">
