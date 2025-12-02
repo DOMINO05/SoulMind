@@ -27,8 +27,8 @@ const Footer = () => {
         </div>
         <div className="md:text-right">
           <h4 className="font-bold mb-2">Kapcsolat</h4>
-          <p className="text-gray-400">soulmindacademy@gmail.com</p>
-          <p className="text-gray-400">+36 30 478 5623</p>
+          <a href="mailto:soulmindacademy@gmail.com" className="block text-gray-400 hover:text-primary transition">soulmindacademy@gmail.com</a>
+          <a href="tel:+36304785623" className="block text-gray-400 hover:text-primary transition">+36 30 478 5623</a>
         </div>
       </div>
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-gray-500 text-xs">

@@ -404,8 +404,12 @@ const Admin = () => {
                     {data.responses.map(r => (
                       <tr key={r.id} className="hover:bg-gray-50 transition">
                         <td className="p-4 font-medium text-dark align-top whitespace-normal break-words">{r.full_name}</td>
-                        <td className="p-4 text-gray-600 align-top whitespace-normal break-all">{r.email}</td>
-                        <td className="p-4 text-gray-600 font-mono text-sm align-top whitespace-nowrap">{r.phone}</td>
+                        <td className="p-4 text-gray-600 align-top whitespace-normal break-all">
+                          <a href={`mailto:${r.email}`} className="hover:text-primary hover:underline">{r.email}</a>
+                        </td>
+                        <td className="p-4 text-gray-600 font-mono text-sm align-top whitespace-nowrap">
+                          <a href={`tel:${r.phone}`} className="hover:text-primary hover:underline">{r.phone}</a>
+                        </td>
                         <td className="p-4 text-gray-600 align-top whitespace-pre-wrap break-words">{r.interests}</td>
                         <td className="p-4 text-right align-top">
                           <button onClick={() => deleteItem('questionnaire', r.id)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-[4px] transition"><Trash2 size={18}/></button>
@@ -425,8 +429,14 @@ const Admin = () => {
                       <button onClick={() => deleteItem('questionnaire', r.id)} className="text-red-500 p-1 bg-red-50 rounded-[4px] active:bg-red-100"><Trash2 size={16}/></button>
                     </div>
                     <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-2 break-all"><Mail size={14} className="text-primary shrink-0"/> {r.email}</div>
-                      <div className="flex items-center gap-2"><Phone size={14} className="text-primary shrink-0"/> {r.phone}</div>
+                      <div className="flex items-center gap-2 break-all">
+                        <Mail size={14} className="text-primary shrink-0"/> 
+                        <a href={`mailto:${r.email}`} className="hover:underline hover:text-primary">{r.email}</a>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone size={14} className="text-primary shrink-0"/> 
+                        <a href={`tel:${r.phone}`} className="hover:underline hover:text-primary">{r.phone}</a>
+                      </div>
                       <div className="flex items-start gap-2 bg-gray-50 p-3 rounded-[6px] mt-2 border border-gray-100">
                         <MessageSquare size={14} className="text-primary mt-1 shrink-0"/> 
                         <span className="italic whitespace-pre-wrap break-words">{r.interests || "Nincs üzenet"}</span>
