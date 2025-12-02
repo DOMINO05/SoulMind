@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon } from 'lucide-react';
+import ContactLink from '../components/ContactLink';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('sections');
@@ -405,10 +406,10 @@ const Admin = () => {
                       <tr key={r.id} className="hover:bg-gray-50 transition">
                         <td className="p-4 font-medium text-dark align-top whitespace-normal break-words">{r.full_name}</td>
                         <td className="p-4 text-gray-600 align-top whitespace-normal break-all">
-                          <a href={`mailto:${r.email}`} className="hover:text-primary hover:underline">{r.email}</a>
+                          <ContactLink value={r.email} type="email" className="hover:text-primary hover:underline" />
                         </td>
                         <td className="p-4 text-gray-600 font-mono text-sm align-top whitespace-nowrap">
-                          <a href={`tel:${r.phone}`} className="hover:text-primary hover:underline">{r.phone}</a>
+                          <ContactLink value={r.phone} type="phone" className="hover:text-primary hover:underline" />
                         </td>
                         <td className="p-4 text-gray-600 align-top whitespace-pre-wrap break-words">{r.interests}</td>
                         <td className="p-4 text-right align-top">
@@ -431,11 +432,11 @@ const Admin = () => {
                     <div className="space-y-2 text-sm text-gray-600">
                       <div className="flex items-center gap-2 break-all">
                         <Mail size={14} className="text-primary shrink-0"/> 
-                        <a href={`mailto:${r.email}`} className="hover:underline hover:text-primary">{r.email}</a>
+                        <ContactLink value={r.email} type="email" className="hover:underline hover:text-primary" />
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone size={14} className="text-primary shrink-0"/> 
-                        <a href={`tel:${r.phone}`} className="hover:underline hover:text-primary">{r.phone}</a>
+                        <ContactLink value={r.phone} type="phone" className="hover:underline hover:text-primary" />
                       </div>
                       <div className="flex items-start gap-2 bg-gray-50 p-3 rounded-[6px] mt-2 border border-gray-100">
                         <MessageSquare size={14} className="text-primary mt-1 shrink-0"/> 

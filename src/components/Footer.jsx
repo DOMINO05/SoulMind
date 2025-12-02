@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import ContactLink from './ContactLink';
 
 const Footer = () => {
   return (
@@ -27,8 +28,8 @@ const Footer = () => {
         </div>
         <div className="md:text-right">
           <h4 className="font-bold mb-2">Kapcsolat</h4>
-          <a href="mailto:soulmindacademy@gmail.com" className="block text-gray-400 hover:text-primary transition">soulmindacademy@gmail.com</a>
-          <a href="tel:+36304785623" className="block text-gray-400 hover:text-primary transition">+36 30 478 5623</a>
+          <ContactLink value="soulmindacademy@gmail.com" type="email" className="block text-gray-400 hover:text-primary transition" />
+          <ContactLink value="+36 30 478 5623" type="phone" className="block text-gray-400 hover:text-primary transition" />
         </div>
       </div>
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-gray-500 text-xs">
