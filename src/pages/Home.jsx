@@ -71,7 +71,7 @@ const Home = () => {
 
         <div className={heroContainerClass}>
           <div>
-            <h1 className="uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-normal text-white">
+            <h1 className="uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-normal md:leading-relaxed text-white">
               Tudatos Vezetés & Önismeret
             </h1>
             
