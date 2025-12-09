@@ -53,7 +53,7 @@ const Team = () => {
                     
                     {/* Image Container */}
                     <div className="w-full md:w-1/3 lg:w-1/4 shrink-0">
-                      <div className="aspect-[3/4] md:aspect-square rounded-2xl overflow-hidden shadow-lg bg-gray-50 relative">
+                      <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-lg bg-gray-50 relative">
                         {member.image_path ? (
                           <img 
                             src={member.image_path} 
