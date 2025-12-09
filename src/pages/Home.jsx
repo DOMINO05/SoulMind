@@ -108,7 +108,7 @@ const Home = () => {
         <div className={heroContainerClass}>
           <div className={isCorporate ? "z-10 py-20" : ""}>
             {/* KONTRASZT JAVÍTÁS: drop-shadow-md hozzáadva */}
-            <h1 className={`uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-tight ${isCorporate ? 'text-primary' : 'text-white'}`}>
+            <h1 className={`uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-normal ${isCorporate ? 'text-primary' : 'text-white'}`}>
               {activeTheme.type === 'corporate' ? 'Professzionális Megoldások' : 'Tudatos Vezetés & Önismeret'}
             </h1>
             
@@ -152,7 +152,7 @@ const Home = () => {
                         <div 
                           key={train.id} 
                           className={`
-                            relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(25%-2rem)] max-w-sm
+                            relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33%-2rem)] max-w-md
                             ${activeTheme.type === 'corporate' ? 'aspect-square rounded-lg' : 'aspect-[4/5] rounded-2xl'}
                           `}
                           onClick={() => setLightboxImg({ src: train.image_path, alt: train.alt_text })}
