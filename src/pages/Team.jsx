@@ -44,36 +44,39 @@ const Team = () => {
             <p>Jelenleg nincsenek feltöltött munkatársak.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-12 md:gap-24">
+          <div className="flex flex-col gap-12">
             {team.map((member, index) => {
               const isEven = index % 2 !== 0;
               return (
-                <div key={member.id} className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 ${isEven ? 'md:flex-row-reverse' : ''}`}>
-                  
-                  {/* Image Container */}
-                  <div className="w-full md:w-1/2 lg:w-5/12 aspect-[3/4] md:aspect-[3.5/4] rounded-2xl overflow-hidden shadow-2xl relative group bg-gray-100">
-                    {member.image_path ? (
-                      <img 
-                        src={member.image_path} 
-                        alt={member.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                        <User size={64} />
+                <div key={member.id} className="bg-white rounded-3xl shadow-md border border-gray-100 p-6 md:p-10 hover:shadow-xl transition-shadow duration-300">
+                  <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-12 ${isEven ? 'md:flex-row-reverse' : ''}`}>
+                    
+                    {/* Image Container */}
+                    <div className="w-full md:w-1/3 lg:w-1/4 shrink-0">
+                      <div className="aspect-[3/4] md:aspect-square rounded-2xl overflow-hidden shadow-lg bg-gray-50 relative">
+                        {member.image_path ? (
+                          <img 
+                            src={member.image_path} 
+                            alt={member.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-300">
+                            <User size={64} />
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
+                    </div>
 
-                  {/* Content */}
-                  <div className="w-full md:w-1/2 lg:w-7/12">
-                    <div className={`flex flex-col ${isEven ? 'md:items-end md:text-right' : 'md:items-start md:text-left'} items-center text-center`}>
-                      <h2 className="text-3xl md:text-4xl font-serif font-bold text-dark mb-4">{member.name}</h2>
-                      <div className="w-16 h-1 bg-primary rounded-full mb-6"></div>
-                      <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap">
-                        {member.bio}
-                      </p>
+                    {/* Content */}
+                    <div className="w-full md:w-2/3 lg:w-3/4">
+                      <div className="flex flex-col items-center md:items-start">
+                        <h2 className="text-3xl font-serif font-bold text-dark mb-4 text-center md:text-left w-full">{member.name}</h2>
+                        <div className="w-16 h-1 bg-primary rounded-full mb-6 mx-auto md:mx-0"></div>
+                        <p className="text-gray-600 leading-relaxed text-lg whitespace-pre-wrap text-justify w-full">
+                          {member.bio}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
