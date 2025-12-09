@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { ArrowRight, Leaf, Heart, Sun, X, Download } from 'lucide-react';
+import { ArrowRight, X, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
-  // Fix Stabilitás Téma (Style 3)
-  const activeTheme = {
-    type: 'creative',
-    heroImage: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop"
-  };
+  const heroImage = "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop";
   
   const [sections, setSections] = useState([]);
   const [sectionItems, setSectionItems] = useState([]);
@@ -57,74 +53,35 @@ const Home = () => {
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-light text-primary font-serif text-xl animate-pulse">Betöltés...</div>;
 
-  // Stílus változók
-  const isCorporate = activeTheme.type === 'corporate';
-  
-  const heroContainerClass = isCorporate
-    ? "max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center h-full relative z-10 pt-20"
-    : "relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up pt-24";
-
-  const getSectionLayout = (index) => {
-    if (activeTheme.type === 'corporate') return 'grid md:grid-cols-3 gap-8';
-    return 'flex flex-col md:flex-row items-start gap-12'; 
-  };
-
-  const ctaTexts = ["Jelentkezem", "Érdekel", "Csatlakozom", "Részletek"];
+  const heroContainerClass = "relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up pt-24";
 
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500">
       
       {/* HERO SECTION */}
-      <header className={`relative h-[95vh] overflow-hidden flex items-center ${isCorporate ? 'bg-light' : 'justify-center'}`}>
-        
-        {isCorporate ? (
-           // 2-es Stílus (Üzleti)
-           <>
-             {/* DESKTOP: Jobb oldali kép */}
-             <div className="hidden md:block absolute right-0 top-0 w-1/2 h-full clip-path-slant">
-                <img src={activeTheme.heroImage} className="w-full h-full object-cover" alt="Hero" />
-                <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
-             </div>
-             
-             {/* MOBIL: Háttérkép erős fehér fedéssel */}
-             <div className="md:hidden absolute inset-0 z-0">
-                <img src={activeTheme.heroImage} className="w-full h-full object-cover" alt="Hero" />
-                <div className="absolute inset-0 bg-white/90"></div> {/* Erős fehér fedés, hogy a sötét szöveg olvasható legyen */}
-             </div>
-           </>
-        ) : (
-           // 1-es és 3-as Stílus (Normál)
-           <div className="absolute inset-0 z-0">
-             <img 
-               src={activeTheme.heroImage} 
-               alt="Background" 
-               key={activeTheme.heroImage}
-               className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-110"
-             />
-             <div className="absolute inset-0 bg-black/80" />
-           </div>
-        )}
+      <header className="relative h-[95vh] overflow-hidden flex items-center justify-center">
+         <div className="absolute inset-0 z-0">
+           <img 
+             src={heroImage} 
+             alt="Background" 
+             className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-110"
+           />
+           <div className="absolute inset-0 bg-black/80" />
+         </div>
 
         <div className={heroContainerClass}>
-          <div className={isCorporate ? "z-10 py-20" : ""}>
-            {/* KONTRASZT JAVÍTÁS: drop-shadow-md hozzáadva */}
-            <h1 className={`uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-normal ${isCorporate ? 'text-primary' : 'text-white'}`}>
-              {activeTheme.type === 'corporate' ? 'Professzionális Megoldások' : 'Tudatos Vezetés & Önismeret'}
+          <div>
+            <h1 className="uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-normal text-white">
+              Tudatos Vezetés & Önismeret
             </h1>
             
-            {/* KONTRASZT JAVÍTÁS: szöveg szín és árnyék */}
-            <p className={`text-lg md:text-xl mb-10 font-light leading-relaxed drop-shadow-md ${isCorporate ? 'text-gray-800' : 'text-gray-100'}`}>
+            <p className="text-lg md:text-xl mb-10 font-light leading-relaxed drop-shadow-md text-gray-100">
               Hiteles vezetés pszichológiai alapokon. Fejleszd vezetői kompetenciáidat és önismeretedet szakértőink vezetésével.
             </p>
             
             <Link 
               to="/jelentkezes" 
-              className={`inline-flex items-center px-8 py-4 rounded-full transition-all duration-300 shadow-xl font-medium border backdrop-blur-sm
-                ${isCorporate 
-                  ? 'bg-primary text-white hover:bg-dark border-transparent' 
-                  : 'bg-primary text-white hover:bg-white hover:text-primary border-primary'
-                }
-              `}
+              className="inline-flex items-center px-8 py-4 rounded-full transition-all duration-300 shadow-xl font-medium border backdrop-blur-sm bg-primary text-white hover:bg-white hover:text-primary border-primary"
             >
               Csatlakozz hozzánk <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
@@ -151,10 +108,7 @@ const Home = () => {
                       {trainings.map(train => (
                         <div 
                           key={train.id} 
-                          className={`
-                            relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33%-2rem)] max-w-md
-                            ${activeTheme.type === 'corporate' ? 'aspect-square rounded-lg' : 'aspect-[4/5] rounded-2xl'}
-                          `}
+                          className="relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33%-2rem)] max-w-md aspect-[4/5] rounded-2xl"
                           onClick={() => setLightboxImg({ src: train.image_path, alt: train.alt_text })}
                         >
                           <img 
