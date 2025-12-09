@@ -71,8 +71,9 @@ const Home = () => {
 
         <div className={heroContainerClass}>
           <div>
-            <h1 className="uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-normal md:leading-relaxed text-white">
-              Tudatos Vezetés & Önismeret
+            <h1 class="uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md text-white">
+              <span class="block mb-2">Tudatos Vezetés &</span>
+              <span class="block">Önismeret</span>
             </h1>
             
             <p className="text-lg md:text-xl mb-10 font-light leading-relaxed drop-shadow-md text-gray-100">
