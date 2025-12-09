@@ -43,6 +43,7 @@ const Navbar = () => {
           <div className="hidden md:flex space-x-10 items-center">
             <NavLink to="/" className={navLinkClass}>Főoldal</NavLink>
             <NavLink to="/szolgaltatasok" className={navLinkClass}>Szolgáltatások</NavLink>
+            <NavLink to="/munkatarsak" className={navLinkClass}>Munkatársak</NavLink>
             <NavLink to="/kotetek" className={navLinkClass}>Kötetek</NavLink>
             <NavLink 
               to="/jelentkezes" 
@@ -68,6 +69,7 @@ const Navbar = () => {
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 px-4 flex flex-col space-y-4 animate-fade-in">
           <Link to="/" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Főoldal</Link>
           <Link to="/szolgaltatasok" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Szolgáltatások</Link>
+          <Link to="/munkatarsak" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Munkatársak</Link>
           <Link to="/kotetek" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Kötetek</Link>
           <Link to="/jelentkezes" onClick={() => setIsOpen(false)} className="text-primary font-bold hover:text-dark">JELENTKEZZ</Link>
           <Link to="/admin" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Admin</Link>

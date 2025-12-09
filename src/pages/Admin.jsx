@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('responses');
-  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [] });
+  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [] });
   const [refresh, setRefresh] = useState(0);
   
   const [uploading, setUploading] = useState(false);
@@ -22,22 +22,30 @@ const Admin = () => {
   const [editingVolumeId, setEditingVolumeId] = useState(null);
   const [editVolumeData, setEditVolumeData] = useState({ title: '', link: '' });
 
+  // New Team State
+  const [newMember, setNewMember] = useState({ name: '', bio: '' });
+  const [memberImage, setMemberImage] = useState(null);
+  const [editingMemberId, setEditingMemberId] = useState(null);
+  const [editMemberData, setEditMemberData] = useState({ name: '', bio: '' });
+
 
   useEffect(() => {
     const load = async () => {
-      const [s, i, t, r, v] = await Promise.all([
+      const [s, i, t, r, v, tm] = await Promise.all([
         supabase.from('sections').select('*').order('id'),
         supabase.from('section_items').select('*').order('id'),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
         supabase.from('questionnaire').select('*').order('created_at', { ascending: false }),
-        supabase.from('volumes').select('*').order('id')
+        supabase.from('volumes').select('*').order('id'),
+        supabase.from('team_members').select('*').order('id')
       ]);
       setData({ 
         sections: s.data || [], 
         items: i.data || [], 
         trainings: t.data || [], 
         responses: r.data || [],
-        volumes: v.data || []
+        volumes: v.data || [],
+        team: tm.data || []
       });
     };
     load();
@@ -165,6 +173,67 @@ const Admin = () => {
     }
   };
 
+  // --- TEAM CRUD ---
+  const handleTeamImageUpload = async (file) => {
+    if (!file) return null;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `team/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
+    if (uploadError) throw uploadError;
+    const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+    return publicUrl;
+  };
+
+  const addMember = async () => {
+    if (!newMember.name.trim()) return alert("A név megadása kötelező!");
+    
+    setUploading(true);
+    try {
+      let imageUrl = null;
+      if (memberImage) {
+        imageUrl = await handleTeamImageUpload(memberImage);
+      }
+
+      const { error } = await supabase.from('team_members').insert({
+        name: newMember.name,
+        bio: newMember.bio,
+        image_path: imageUrl
+      });
+
+      if (error) throw error;
+      
+      setNewMember({ name: '', bio: '' });
+      setMemberImage(null);
+      triggerRefresh();
+    } catch (error) {
+      console.error("Hiba a munkatárs hozzáadásakor:", error);
+      alert("Hiba történt mentéskor.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const startEditingMember = (member) => {
+    setEditingMemberId(member.id);
+    setEditMemberData({ name: member.name, bio: member.bio || '' });
+  };
+
+  const updateMember = async (id) => {
+    if (!editMemberData.name.trim()) return;
+    try {
+      const { error } = await supabase.from('team_members')
+        .update({ name: editMemberData.name, bio: editMemberData.bio })
+        .eq('id', id);
+        
+      if (error) throw error;
+      setEditingMemberId(null);
+      triggerRefresh();
+    } catch (error) {
+       console.error("Update error:", error);
+       alert("Hiba történt frissítéskor.");
+    }
+  };
+
   // FIX KEREKÍTÉS: rounded-t-[10px] a rounded-t-lg helyett
   const TabButton = ({ id, label, icon: Icon }) => (
     <button 
@@ -194,6 +263,7 @@ const Admin = () => {
         <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] flex-wrap items-center">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
           <TabButton id="volumes" label="Kötetek" icon={Book} />
+          <TabButton id="team" label="Munkatársak" icon={User} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
           <TabButton id="responses" label="Jelentkezők" icon={Users} />
           
@@ -364,6 +434,104 @@ const Admin = () => {
                   </div>
                 ))}
                 {data.volumes.length === 0 && <p className="text-center text-gray-500 py-8">Még nincs feltöltött kötet.</p>}
+              </div>
+            </div>
+          )}
+
+          {/* MUNKATÁRSAK KEZELÉSE */}
+          {activeTab === 'team' && (
+            <div className="space-y-8">
+              {/* Új munkatárs hozzáadása */}
+              <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100">
+                <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új munkatárs hozzáadása</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input 
+                    type="text" 
+                    placeholder="Név" 
+                    value={newMember.name}
+                    onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                    className="border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none w-full"
+                  />
+                  <div className="md:col-span-2">
+                    <textarea 
+                      placeholder="Bemutatkozás" 
+                      value={newMember.bio}
+                      onChange={(e) => setNewMember({...newMember, bio: e.target.value})}
+                      className="border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none w-full min-h-[100px]"
+                    />
+                  </div>
+                  <div className="md:col-span-2 flex items-center gap-4">
+                     <label className="flex-1 cursor-pointer bg-white border border-blue-200 text-blue-700 px-4 py-2 rounded-[4px] hover:bg-blue-100 transition flex items-center justify-center gap-2">
+                        <ImageIcon size={18} />
+                        {memberImage ? memberImage.name : "Fénykép kiválasztása"}
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => setMemberImage(e.target.files[0])} />
+                     </label>
+                     <button 
+                       onClick={addMember} 
+                       disabled={uploading}
+                       className={`bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     >
+                       {uploading ? 'Feltöltés...' : 'Hozzáadás'}
+                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista */}
+              <div className="grid gap-4">
+                {data.team.map(member => (
+                  <div key={member.id} className="bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
+                    
+                    {/* Kép */}
+                    <div className="w-20 h-28 bg-gray-100 rounded-[4px] overflow-hidden flex-shrink-0">
+                      {member.image_path ? (
+                        <img src={member.image_path} alt={member.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300"><User size={24}/></div>
+                      )}
+                    </div>
+
+                    {/* Tartalom */}
+                    <div className="flex-grow w-full">
+                       {editingMemberId === member.id ? (
+                         <div className="grid gap-2">
+                           <input 
+                             type="text" 
+                             value={editMemberData.name} 
+                             onChange={(e) => setEditMemberData({...editMemberData, name: e.target.value})}
+                             className="border border-primary rounded-[4px] px-3 py-1 w-full"
+                           />
+                           <textarea 
+                             value={editMemberData.bio} 
+                             onChange={(e) => setEditMemberData({...editMemberData, bio: e.target.value})}
+                             className="border border-gray-300 rounded-[4px] px-3 py-1 w-full text-sm min-h-[80px]"
+                           />
+                           <div className="flex gap-2 mt-2">
+                             <button onClick={() => updateMember(member.id)} className="bg-green-50 text-green-600 px-3 py-1 rounded-[4px] text-sm hover:bg-green-100 flex items-center gap-1"><Check size={14}/> Mentés</button>
+                             <button onClick={() => setEditingMemberId(null)} className="bg-gray-50 text-gray-500 px-3 py-1 rounded-[4px] text-sm hover:bg-gray-100 flex items-center gap-1"><X size={14}/> Mégse</button>
+                           </div>
+                         </div>
+                       ) : (
+                         <div>
+                           <h4 className="font-bold text-dark text-lg">{member.name}</h4>
+                           <p className="text-gray-600 text-sm whitespace-pre-wrap mt-1">{member.bio}</p>
+                         </div>
+                       )}
+                    </div>
+
+                    {/* Műveletek */}
+                    <div className="flex gap-2 self-end md:self-start">
+                      {editingMemberId !== member.id && (
+                        <>
+                          <button onClick={() => startEditingMember(member)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-[4px] transition"><Edit2 size={18} /></button>
+                          <button onClick={() => deleteItem('team_members', member.id)} className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-[4px] transition"><Trash2 size={18}/></button>
+                        </>
+                      )}
+                    </div>
+
+                  </div>
+                ))}
+                {data.team.length === 0 && <p className="text-center text-gray-500 py-8">Még nincs feltöltött munkatárs.</p>}
               </div>
             </div>
           )}
