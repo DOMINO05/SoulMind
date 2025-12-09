@@ -36,7 +36,7 @@ const Volumes = () => {
   return (
     <div className="min-h-screen bg-light pt-24 pb-12 animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 mt-10">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-dark mb-4">Kötetek</h1>
           <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
           <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto font-light">

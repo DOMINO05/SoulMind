@@ -188,7 +188,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-gray-100 pt-24 pb-12 px-2 md:px-4 animate-fade-in">
       {/* FIX KEREKÍTÉS: rounded-[12px] */}
-      <div className="max-w-7xl mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
+      <div className="max-w-7xl mt-5 mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
         
         {/* FIX KEREKÍTÉS: rounded-t-[12px] */}
         <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] flex-wrap items-center">

@@ -47,8 +47,8 @@ const Services = () => {
 
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500 pt-24">
-      <div className="max-w-7xl mx-auto px-4 mb-16 mt-20 text-center">
-        <h1 className="text-4xl font-serif font-bold text-dark mb-6">Szolgáltatásaink</h1>
+      <div className="max-w-7xl mx-auto px-4 mb-16 mt-10 text-center">
+        <h1 className="text-5xl font-serif font-bold text-dark mb-6">Szolgáltatásaink</h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Fedezd fel kínálatunkat, melyek célja a tudatos fejlődés és a mentális jólét támogatása.
         </p>
@@ -80,7 +80,7 @@ const Services = () => {
                   <div className="md:w-2/3 grid gap-6">
                     {items.map(item => (
                       <div key={item.id} className="p-8 border-l-4 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/60 border-primary hover:bg-white rounded-xl">
-                        <p className="text-xl leading-relaxed font-medium text-gray-800">{item.content}</p>
+                        <p className="text-lg md:text-xl leading-relaxed font-medium text-gray-800">{item.content}</p>
                       </div>
                     ))}
                     
