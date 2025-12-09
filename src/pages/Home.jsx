@@ -108,13 +108,8 @@ const Home = () => {
         <div className={heroContainerClass}>
           <div className={isCorporate ? "z-10 py-20" : ""}>
             {/* KONTRASZT JAVÍTÁS: drop-shadow-md hozzáadva */}
-            <span className={`uppercase tracking-[0.3em] text-sm font-bold mb-4 block drop-shadow-md ${isCorporate ? 'text-primary' : 'text-secondary'}`}>
+            <h1 className={`uppercase tracking-[0.2em] text-2xl md:text-4xl lg:text-5xl font-bold mb-8 block drop-shadow-md leading-tight ${isCorporate ? 'text-primary' : 'text-white'}`}>
               {activeTheme.type === 'corporate' ? 'Professzionális Megoldások' : 'Tudatos Vezetés & Önismeret'}
-            </span>
-            
-            {/* KONTRASZT JAVÍTÁS: drop-shadow-lg hozzáadva a címhez */}
-            <h1 className={`text-5xl md:text-7xl font-serif font-bold mb-6 leading-tight drop-shadow-lg ${isCorporate ? 'text-dark' : 'text-white'}`}>
-              SoulMind Academy
             </h1>
             
             {/* KONTRASZT JAVÍTÁS: szöveg szín és árnyék */}
@@ -139,12 +134,8 @@ const Home = () => {
 
       <main>
         {sections
-          .filter(section => section.name !== 'A témákhoz kapcsolódó kötetek')
-          .map((section, index) => {
-          const items = getItems(section.id);
-          const isEven = index % 2 === 0;
-
-          if (section.name === 'Tréningek') {
+          .filter(section => section.name === 'Tréningek')
+          .map((section) => {
             return (
               <section key={section.id} className="py-24 bg-white px-4">
                 <div className="max-w-7xl mx-auto">
@@ -156,12 +147,12 @@ const Home = () => {
                   {trainings.length === 0 ? (
                     <p className="text-center text-gray-500">Jelenleg nincs elérhető tréning.</p>
                   ) : (
-                    <div className={`grid gap-8 ${activeTheme.type === 'creative' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
+                    <div className="flex flex-wrap justify-center gap-8">
                       {trainings.map(train => (
                         <div 
                           key={train.id} 
                           className={`
-                            relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50
+                            relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(25%-2rem)] max-w-sm
                             ${activeTheme.type === 'corporate' ? 'aspect-square rounded-lg' : 'aspect-[4/5] rounded-2xl'}
                           `}
                           onClick={() => setLightboxImg({ src: train.image_path, alt: train.alt_text })}
@@ -178,53 +169,6 @@ const Home = () => {
                 </div>
               </section>
             );
-          }
-
-          return (
-            <section key={section.id} className={`py-24 px-4 ${isEven ? 'bg-warm-light' : 'bg-white'} transition-colors duration-500`}>
-              <div className="max-w-6xl mx-auto">
-                
-                <div className={activeTheme.type === 'corporate' ? 'block' : 'flex flex-col md:flex-row items-start gap-12'}>
-                  
-                  <div className={`${activeTheme.type === 'corporate' ? 'text-center mb-12' : 'md:w-1/3 relative md:sticky md:top-28 mb-8 md:mb-0'}`}>
-                    <h2 className={`text-4xl font-serif font-bold text-dark mb-6 relative inline-block`}>
-                      {section.name}
-                      <span className={`absolute -bottom-2 left-0 h-1 bg-primary rounded-full ${isCorporate ? 'w-full left-1/2 -translate-x-1/2' : 'w-1/2'}`}></span>
-                    </h2>
-                    {!isCorporate && (
-                      <div className="text-primary opacity-80 mt-4">
-                        {index === 0 ? <Leaf size={48} strokeWidth={1} /> : index === 1 ? <Heart size={48} strokeWidth={1} /> : <Sun size={48} strokeWidth={1} />}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className={`${activeTheme.type === 'corporate' ? getSectionLayout(index) : 'md:w-2/3 grid gap-6'}`}>
-                    {items.map(item => (
-                      <div key={item.id} className={`
-                        p-8 border-l-4 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1
-                        ${isCorporate 
-                          ? 'bg-white border-t-4 border-l-0 border-primary text-center rounded-lg' 
-                          : 'bg-white/60 border-primary hover:bg-white'
-                        }
-                        rounded-xl
-                      `}>
-                        <p className="text-xl leading-relaxed font-medium text-gray-800">{item.content}</p>
-                      </div>
-                    ))}
-                    
-                    <div className="text-center md:text-left pt-4">
-                      <Link 
-                        to="/jelentkezes" 
-                        className="inline-flex items-center px-6 py-3 rounded-lg bg-primary text-white font-bold hover:bg-dark transition-all duration-300 shadow-md hover:shadow-lg text-sm tracking-wide group"
-                      >
-                        {ctaTexts[index % ctaTexts.length]} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          );
         })}
       </main>
 

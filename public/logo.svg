@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Réteg_1" data-name="Réteg 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 980.65 527.51">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-2 {
+        clip-path: url(#clippath-4);
+      }
+
+      .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7 {
+        fill: none;
+      }
+
+      .cls-3 {
+        clip-path: url(#clippath-2);
+      }
+
+      .cls-8 {
+        font-family: TwCenMT-Regular, 'Tw Cen MT';
+        font-size: 76.06px;
+      }
+
+      .cls-8, .cls-9 {
+        fill: #0856f4;
+      }
+
+      .cls-9 {
+        font-family: TwCenMT-Bold, 'Tw Cen MT';
+        font-size: 107.83px;
+        font-weight: 700;
+      }
+
+      .cls-4 {
+        clip-path: url(#clippath-3);
+      }
+
+      .cls-10 {
+        fill: url(#Névtelen_színátmenet_5);
+      }
+
+      .cls-11 {
+        fill: url(#Névtelen_színátmenet_2);
+      }
+
+      .cls-6 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-12 {
+        fill: url(#Névtelen_színátmenet_4);
+      }
+
+      .cls-7 {
+        clip-path: url(#clippath-1);
+      }
+
+      .cls-13 {
+        fill: url(#Névtelen_színátmenet_3);
+      }
+
+      .cls-14 {
+        fill: url(#Névtelen_színátmenet);
+      }
+    </style>
+    <clipPath id="clippath">
+      <path class="cls-5" d="m240.01,105.88c-73.91,34.73-72.06,113.1-54.71,151.09,24.06,52.67,79.2,123.73,108.8,161.05,5.85,7.38,15.99,14.16,23.18,7.85l5.22-3.3c5.83-5.12,5.14-16.23.5-22.27-27.21-35.37-91.81-118.57-107.76-164.73-10.16-29.4-3.33-77.7,36.16-98.54,34.09-17.99,63.2-3.8,77.15,5.89,5.69,3.95,13.49,4.16,19.36.44l2.08-1.31c9.08-5.74,9.45-17.81.8-24.08-14.17-10.28-37.09-22.61-65.51-22.61-13.9,0-29.12,2.95-45.27,10.54"/>
+    </clipPath>
+    <linearGradient id="Névtelen_színátmenet" data-name="Névtelen színátmenet" x1="59.3" y1="581" x2="60.3" y2="581" gradientTransform="translate(-10566.32 105832.11) scale(181.7 -181.7)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f9bb0d"/>
+      <stop offset=".14" stop-color="#f9bb0d"/>
+      <stop offset="1" stop-color="#ff9200"/>
+      <stop offset="1" stop-color="#ff9200"/>
+    </linearGradient>
+    <clipPath id="clippath-1">
+      <path class="cls-5" d="m362.87,169.63c-5.27,6.03-6.64,8.03.25,12.5l13.53,1.54c6.28,4.08,12.66,4.76,17.61-.63,15.77-17.17,50.62-16.41,65.03.89,17.44,20.93,10.8,49.28.37,62.42-31.24,39.36-104.18,103.57-128.38,125.7-4.7,4.3-5.65,10.93-2.33,16.2l1.19,1.89c4.78,7.56,16.06,9.02,22.96,2.98,33.59-29.41,109.25-90.61,137.95-139.29,11.46-19.44,18.32-63.54-14.58-93.44-16.15-14.68-33.4-20.22-49.68-20.23-27.14,0-51.61,15.38-63.94,29.48"/>
+    </clipPath>
+    <linearGradient id="Névtelen_színátmenet_2" data-name="Névtelen színátmenet 2" x1="59.3" y1="580.79" x2="60.3" y2="580.79" gradientTransform="translate(-9931.08 101065.6) scale(173.55 -173.55)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f9bb0d"/>
+      <stop offset=".14" stop-color="#f9bb0d"/>
+      <stop offset="1" stop-color="#ff9200"/>
+      <stop offset="1" stop-color="#ff9200"/>
+    </linearGradient>
+    <clipPath id="clippath-2">
+      <path class="cls-5" d="m325.32,138.88c0,14.52,11.58,26.29,25.86,26.29s25.86-11.77,25.86-26.29-11.58-26.29-25.86-26.29-25.86,11.77-25.86,26.29"/>
+    </clipPath>
+    <linearGradient id="Névtelen_színátmenet_3" data-name="Névtelen színátmenet 3" x1="59.3" y1="580.95" x2="60.3" y2="580.95" gradientTransform="translate(-2739.62 30189.83) scale(51.73 -51.73)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0685f7"/>
+      <stop offset=".24" stop-color="#0685f7"/>
+      <stop offset="1" stop-color="#05007f"/>
+    </linearGradient>
+    <clipPath id="clippath-3">
+      <path class="cls-5" d="m313.6,177.38l-29.9,49.72c-3.97,6.61,4.25,13.75,10.24,8.9,4.67-3.79,11.61-.19,11.21,5.8l-6.13,92.28c-.48,7.2,9.03,10.19,12.76,4.02l20.68-34.22c2.5-4.14,8.38-4.48,11.34-.65l27.09,35.07c4.03,5.21,12.37,2.34,12.33-4.25l-.64-104.4c-.04-5.96,6.99-9.15,11.45-5.2l6.67,5.9c5.75,5.09,14.26-1.63,10.64-8.4l-22.66-42.34c-1.16-2.17-3.4-3.56-5.86-3.63l-63.11-1.94c-.07,0-.14,0-.21,0-2.41,0-4.65,1.26-5.9,3.34"/>
+    </clipPath>
+    <linearGradient id="Névtelen_színátmenet_4" data-name="Névtelen színátmenet 4" x1="59.3" y1="580.94" x2="60.3" y2="580.94" gradientTransform="translate(-7561.48 77142.82) scale(132.34 -132.34)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0685f7"/>
+      <stop offset=".29" stop-color="#0685f7"/>
+      <stop offset="1" stop-color="#05007f"/>
+    </linearGradient>
+    <clipPath id="clippath-4">
+      <path class="cls-5" d="m346.03,193.5l-5.14,6.87c-3,4.01-2.23,9.69,1.74,12.75l12.06,9.32c4.05,3.13,9.89,2.34,12.96-1.76l5.14-6.87c3-4.01,2.23-9.69-1.74-12.75l-12.06-9.32c-1.67-1.29-3.65-1.92-5.6-1.92-2.79,0-5.55,1.27-7.36,3.68"/>
+    </clipPath>
+    <linearGradient id="Névtelen_színátmenet_5" data-name="Névtelen színátmenet 5" x1="59.3" y1="580.94" x2="60.3" y2="580.94" gradientTransform="translate(-1761.03 20858.55) scale(35.55 -35.55)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f9bb0d"/>
+      <stop offset=".14" stop-color="#f9bb0d"/>
+      <stop offset="1" stop-color="#ff9200"/>
+      <stop offset="1" stop-color="#ff9200"/>
+    </linearGradient>
+  </defs>
+  <g class="cls-6">
+    <rect class="cls-14" x="71.76" y="81.17" width="382.01" height="365.18" transform="translate(-108.32 293.94) rotate(-49.76)"/>
+  </g>
+  <g class="cls-7">
+    <rect class="cls-11" x="259.34" y="115.78" width="316.34" height="307.73" transform="translate(-58.33 413.17) rotate(-49.64)"/>
+  </g>
+  <g class="cls-3">
+    <rect class="cls-13" x="316.84" y="104.32" width="68.69" height="69.12" transform="translate(-26.09 155.57) rotate(-24.11)"/>
+  </g>
+  <g class="cls-4">
+    <rect class="cls-12" x="253.89" y="155.56" width="186.93" height="207.19" transform="translate(-69.45 140.43) rotate(-20.83)"/>
+  </g>
+  <g class="cls-2">
+    <rect class="cls-10" x="331.2" y="181.83" width="51.28" height="51.73" transform="translate(-22.23 371.33) rotate(-53.55)"/>
+  </g>
+  <text class="cls-9" transform="translate(538 213.14)"><tspan x="0" y="0">SoulMind</tspan></text>
+  <text class="cls-8" transform="translate(959.67 213.14)"><tspan x="0" y="0"> </tspan></text>
+  <text class="cls-8" transform="translate(537.98 292.55)"><tspan x="0" y="0">Acade</tspan><tspan class="cls-1" x="197.17" y="0">m</tspan><tspan x="246.46" y="0">y </tspan></text>
+</svg>

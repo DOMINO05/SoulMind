@@ -14,6 +14,7 @@ const Footer = () => {
         <div className="flex flex-col space-y-2 md:items-center">
           <h4 className="font-bold mb-2">Navigáció</h4>
           <Link to="/" className="text-gray-400 hover:text-primary transition">Főoldal</Link>
+          <Link to="/szolgaltatasok" className="text-gray-400 hover:text-primary transition">Szolgáltatások</Link>
           <Link to="/kotetek" className="text-gray-400 hover:text-primary transition">Kötetek</Link>
           <Link to="/jelentkezes" className="text-gray-400 hover:text-primary transition">Jelentkezés</Link>
           {/* Itt van a link a Footerben */}

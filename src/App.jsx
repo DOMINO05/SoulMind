@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import Services from './pages/Services';
 import Application from './pages/Application';
 import Admin from './pages/Admin';
 import Volumes from './pages/Volumes';
@@ -23,6 +24,7 @@ function App() {
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/szolgaltatasok" element={<Services />} />
               <Route path="/kotetek" element={<Volumes />} />
               <Route path="/jelentkezes" element={<Application />} />
               <Route path="/login" element={<Login />} />
