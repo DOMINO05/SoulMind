@@ -17,6 +17,11 @@ const Admin = () => {
   const [editValue, setEditValue] = useState('');
   const [editDetails, setEditDetails] = useState(''); // New for details
 
+  // New Section State
+  const [newSectionName, setNewSectionName] = useState('');
+  const [editingSectionId, setEditingSectionId] = useState(null);
+  const [editSectionName, setEditSectionName] = useState('');
+
   // New Price State
   const [newPrice, setNewPrice] = useState({ name: '', price: '' });
   const [editingPriceId, setEditingPriceId] = useState(null);
@@ -38,8 +43,8 @@ const Admin = () => {
   useEffect(() => {
     const load = async () => {
       const [s, i, t, r, v, tm, p] = await Promise.all([
-        supabase.from('sections').select('*').order('id'),
-        supabase.from('section_items').select('*').order('id'),
+        supabase.from('sections').select('*').order('id', { ascending: true }),
+        supabase.from('section_items').select('*').order('id', { ascending: true }),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
         supabase.from('questionnaire').select('*').order('created_at', { ascending: false }),
         supabase.from('volumes').select('*').order('id'),
@@ -98,6 +103,47 @@ const Admin = () => {
 
   const cancelEditing = () => {
     setEditingId(null); setEditValue(''); setEditDetails('');
+  };
+
+  // --- SECTIONS CRUD ---
+  const addSection = async () => {
+    if (!newSectionName.trim()) return;
+    const { error } = await supabase.from('sections').insert({ name: newSectionName });
+    if (error) {
+      console.error(error);
+      alert('Hiba a létrehozáskor: ' + error.message);
+    } else {
+      setNewSectionName('');
+      triggerRefresh();
+    }
+  };
+
+  const startEditingSection = (sec) => {
+    setEditingSectionId(sec.id);
+    setEditSectionName(sec.name);
+  };
+
+  const updateSection = async (id) => {
+    if (!editSectionName.trim()) return;
+    const { error } = await supabase.from('sections').update({ name: editSectionName }).eq('id', id);
+    if (error) {
+      alert('Hiba a frissítéskor');
+    } else {
+      setEditingSectionId(null);
+      setEditSectionName('');
+      triggerRefresh();
+    }
+  };
+
+  const deleteSection = async (id) => {
+    if (confirm('Biztosan törlöd a teljes szekciót? A benne lévő összes elem is törlődik!')) {
+      const { error } = await supabase.from('sections').delete().eq('id', id);
+      if (error) {
+        alert('Hiba a törléskor');
+      } else {
+        triggerRefresh();
+      }
+    }
   };
 
   const handleUpload = async (e) => {
@@ -334,13 +380,57 @@ const Admin = () => {
           {/* TARTALOM SZERKESZTŐ */}
           {activeTab === 'sections' && (
             <div className="grid gap-8">
+              
+              {/* Új Szekció Létrehozása */}
+              <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100 mb-4">
+                <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új Szekció Létrehozása</h4>
+                <div className="flex gap-4">
+                  <input 
+                    type="text" 
+                    placeholder="Szekció neve" 
+                    value={newSectionName}
+                    onChange={(e) => setNewSectionName(e.target.value)}
+                    className="flex-1 border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <button 
+                    onClick={addSection}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center gap-2"
+                  >
+                    Létrehozás
+                  </button>
+                </div>
+              </div>
+
               {data.sections.filter(s => s.name !== 'Tréningek' && s.name !== 'A témákhoz kapcsolódó kötetek').map(sec => (
                 // FIX KEREKÍTÉS: rounded-[8px]
                 <div key={sec.id} className="bg-gray-50 p-4 md:p-6 rounded-[8px] border border-gray-200 transition-all hover:shadow-md">
-                  <h3 className="text-xl font-bold text-dark mb-4 pb-2 border-b border-gray-200 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full"></div>
-                    {sec.name}
-                  </h3>
+                  
+                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
+                    {editingSectionId === sec.id ? (
+                      <div className="flex gap-2 w-full items-center">
+                        <input 
+                          value={editSectionName}
+                          onChange={(e) => setEditSectionName(e.target.value)}
+                          className="flex-1 px-3 py-1 border border-primary rounded-[4px] font-bold text-xl"
+                        />
+                        <button onClick={() => updateSection(sec.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-[4px]"><Check size={20}/></button>
+                        <button onClick={() => setEditingSectionId(null)} className="text-gray-500 hover:bg-gray-100 p-2 rounded-[4px]"><X size={20}/></button>
+                      </div>
+                    ) : (
+                      <h3 className="text-xl font-bold text-dark flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        {sec.name}
+                      </h3>
+                    )}
+                    
+                    {editingSectionId !== sec.id && (
+                      <div className="flex gap-2">
+                         <button onClick={() => startEditingSection(sec)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-[4px] transition" title="Szekció átnevezése"><Edit2 size={18}/></button>
+                         <button onClick={() => deleteSection(sec.id)} className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-[4px] transition" title="Szekció törlése"><Trash2 size={18}/></button>
+                      </div>
+                    )}
+                  </div>
+
                   <ul className="space-y-3 mb-4">
                     {data.items.filter(i => i.section_id === sec.id).map(item => (
                       // FIX KEREKÍTÉS: rounded-[6px]

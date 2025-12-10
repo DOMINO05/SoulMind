@@ -25,7 +25,7 @@ const Prices = () => {
 
   return (
     <div className="min-h-screen bg-light pt-24 pb-12 px-4 animate-fade-in transition-colors duration-500">
-       <div className="max-w-4xl mx-auto text-center">
+       <div className="max-w-4xl mx-auto text-center mt-10">
          <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-12">Áraink</h1>
          
          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">

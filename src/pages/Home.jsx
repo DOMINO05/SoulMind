@@ -76,7 +76,7 @@ const Home = () => {
               <span className="block">Önismeret</span>
             </h1>
             
-            <div className="text-base md:text-lg mb-8 font-light leading-relaxed drop-shadow-md text-gray-100 text-left md:text-center space-y-2 max-w-3xl mx-auto">
+            <div className="text-base md:text-lg mb-8 font-light leading-relaxed drop-shadow-md text-gray-100 text-left md:text-center space-y-2 max-w-3xl mx-auto mt-10">
               <p>Gyakran előfordul, hogy nehezen boldogulsz a kommunikációs helyzetekben?</p>
               <p>Vezetői ambícióid vannak és szeretnéd biztonságos közegben kipróbálni magad?</p>
               <p>Kezdő vezető vagy és elveszettnek érzed magad?</p>
