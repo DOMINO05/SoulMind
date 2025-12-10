@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Leaf, Heart, Sun } from 'lucide-react';
+import { ArrowRight, Leaf, Heart, Sun, ChevronDown, ChevronUp } from 'lucide-react';
 
 const Services = () => {
   const [sections, setSections] = useState([]);
   const [sectionItems, setSectionItems] = useState([]);
+  const [expandedItems, setExpandedItems] = useState({});
   const [loading, setLoading] = useState(true);
+
+  const toggleItem = (itemId, hasDetails) => {
+    if (!hasDetails) return;
+    setExpandedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,11 +87,36 @@ const Services = () => {
                   </div>
                   
                   <div className="md:w-2/3 grid gap-6">
-                    {items.map(item => (
-                      <div key={item.id} className="p-8 border-l-4 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/60 border-primary hover:bg-white rounded-xl">
-                        <p className="text-xl leading-relaxed font-medium text-gray-800">{item.content}</p>
-                      </div>
-                    ))}
+                    {items.map(item => {
+                      const hasDetails = !!item.details;
+                      const isExpanded = expandedItems[item.id];
+                      
+                      return (
+                        <div 
+                          key={item.id} 
+                          className={`p-6 border-l-4 shadow-sm transition-all duration-300 bg-white/60 border-primary hover:bg-white rounded-xl ${hasDetails ? 'cursor-pointer hover:shadow-lg' : ''}`}
+                          onClick={() => toggleItem(item.id, hasDetails)}
+                        >
+                          <div className="flex justify-between items-center gap-4">
+                            <p className="text-xl leading-relaxed font-medium text-gray-800">{item.content}</p>
+                            {hasDetails && (
+                              <div className="text-primary flex-shrink-0">
+                                {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Dropdown Content */}
+                          <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0'}`}>
+                            <div className="overflow-hidden">
+                              <div className="pt-2 text-gray-600 border-t border-gray-100">
+                                <p className="whitespace-pre-wrap">{item.details}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                     
                     <div className="text-center md:text-left pt-4">
                       <Link 

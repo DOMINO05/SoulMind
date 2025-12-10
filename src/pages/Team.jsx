@@ -30,7 +30,7 @@ const Team = () => {
 
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500 pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 mb-16 mt-10 text-center">
+      <div className="max-w-7xl mx-auto px-4 mb-16 text-center">
         <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">Munkatársak</h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Ismerje meg szakértő csapatunkat, akik elkötelezettek a fejlődés támogatásában.

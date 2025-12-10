@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('responses');
-  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [] });
+  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [] });
   const [refresh, setRefresh] = useState(0);
   
   const [uploading, setUploading] = useState(false);
@@ -15,6 +15,12 @@ const Admin = () => {
   const [targetSec, setTargetSec] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const [editDetails, setEditDetails] = useState(''); // New for details
+
+  // New Price State
+  const [newPrice, setNewPrice] = useState({ name: '', price: '' });
+  const [editingPriceId, setEditingPriceId] = useState(null);
+  const [editPriceData, setEditPriceData] = useState({ name: '', price: '' });
 
   // New Volume State
   const [newVolume, setNewVolume] = useState({ title: '', link: '' });
@@ -31,13 +37,14 @@ const Admin = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [s, i, t, r, v, tm] = await Promise.all([
+      const [s, i, t, r, v, tm, p] = await Promise.all([
         supabase.from('sections').select('*').order('id'),
         supabase.from('section_items').select('*').order('id'),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
         supabase.from('questionnaire').select('*').order('created_at', { ascending: false }),
         supabase.from('volumes').select('*').order('id'),
-        supabase.from('team_members').select('*').order('id')
+        supabase.from('team_members').select('*').order('id'),
+        supabase.from('prices').select('*').order('sort_order', { ascending: true })
       ]);
       setData({ 
         sections: s.data || [], 
@@ -45,7 +52,8 @@ const Admin = () => {
         trainings: t.data || [], 
         responses: r.data || [],
         volumes: v.data || [],
-        team: tm.data || []
+        team: tm.data || [],
+        prices: p.data || []
       });
     };
     load();
@@ -75,20 +83,21 @@ const Admin = () => {
   const startEditing = (item) => {
     setEditingId(item.id);
     setEditValue(item.content);
+    setEditDetails(item.details || '');
   };
 
   const updateItem = async (id) => {
     if (!editValue.trim()) return;
-    const { error } = await supabase.from('section_items').update({ content: editValue }).eq('id', id);
+    const { error } = await supabase.from('section_items').update({ content: editValue, details: editDetails }).eq('id', id);
     if (error) {
       alert('Hiba a mentés során!');
     } else {
-      setEditingId(null); setEditValue(''); triggerRefresh();
+      setEditingId(null); setEditValue(''); setEditDetails(''); triggerRefresh();
     }
   };
 
   const cancelEditing = () => {
-    setEditingId(null); setEditValue('');
+    setEditingId(null); setEditValue(''); setEditDetails('');
   };
 
   const handleUpload = async (e) => {
@@ -109,6 +118,45 @@ const Admin = () => {
     } finally {
       setUploading(false);
       e.target.value = null;
+    }
+  };
+
+  // --- PRICES CRUD ---
+  const addPrice = async () => {
+    if (!newPrice.name.trim() || !newPrice.price.trim()) return alert("Minden mező kitöltése kötelező!");
+    
+    const { error } = await supabase.from('prices').insert({
+      name: newPrice.name,
+      price: newPrice.price
+    });
+
+    if (error) {
+       console.error("Hiba:", error);
+       alert("Hiba történt mentéskor.");
+    } else {
+       setNewPrice({ name: '', price: '' });
+       triggerRefresh();
+    }
+  };
+
+  const startEditingPrice = (price) => {
+    setEditingPriceId(price.id);
+    setEditPriceData({ name: price.name, price: price.price });
+  };
+
+  const updatePrice = async (id) => {
+    if (!editPriceData.name.trim() || !editPriceData.price.trim()) return;
+    try {
+      const { error } = await supabase.from('prices')
+        .update({ name: editPriceData.name, price: editPriceData.price })
+        .eq('id', id);
+        
+      if (error) throw error;
+      setEditingPriceId(null);
+      triggerRefresh();
+    } catch (error) {
+       console.error("Update error:", error);
+       alert("Hiba történt frissítéskor.");
     }
   };
 
@@ -262,6 +310,7 @@ const Admin = () => {
         {/* FIX KEREKÍTÉS: rounded-t-[12px] */}
         <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] flex-wrap items-center">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
+          <TabButton id="prices" label="Áraink" icon={DollarSign} />
           <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="team" label="Munkatársak" icon={User} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
@@ -297,22 +346,34 @@ const Admin = () => {
                       // FIX KEREKÍTÉS: rounded-[6px]
                       <li key={item.id} className="bg-white p-3 rounded-[6px] border border-gray-100 shadow-sm">
                         {editingId === item.id ? (
-                          <div className="flex flex-col md:flex-row items-start md:items-center gap-2 w-full animate-fade-in">
+                          <div className="flex flex-col gap-2 w-full animate-fade-in">
                             <input 
                               type="text" 
                               value={editValue}
                               onChange={(e) => setEditValue(e.target.value)}
                               className="w-full px-3 py-2 border border-primary rounded-[4px] outline-none focus:ring-2 focus:ring-primary/50 text-dark"
+                              placeholder="Fő szöveg"
                               autoFocus
                             />
-                            <div className="flex gap-2 w-full md:w-auto justify-end">
+                            <textarea 
+                              value={editDetails}
+                              onChange={(e) => setEditDetails(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-[4px] outline-none focus:ring-2 focus:ring-primary/50 text-sm min-h-[80px]"
+                              placeholder="Részletes leírás (lenyíló menü)..."
+                            />
+                            <div className="flex gap-2 w-full justify-end">
                               <button onClick={() => updateItem(item.id)} className="bg-green-50 text-green-600 p-2 rounded-[4px] hover:bg-green-100 flex items-center gap-1"><Check size={18} /> Mentés</button>
                               <button onClick={cancelEditing} className="bg-gray-50 text-gray-500 p-2 rounded-[4px] hover:bg-gray-100 flex items-center gap-1"><X size={18} /> Mégse</button>
                             </div>
                           </div>
                         ) : (
                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-2 md:gap-4">
-                            <span className="text-gray-700 flex-1">{item.content}</span>
+                            <div className="flex-1">
+                              <span className="text-gray-700 font-medium">{item.content}</span>
+                              {item.details && (
+                                <p className="text-gray-400 text-sm mt-1 truncate">{item.details.substring(0, 50)}...</p>
+                              )}
+                            </div>
                             <div className="flex items-center gap-1 shrink-0 self-end md:self-auto">
                               <button onClick={() => startEditing(item)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-[4px] transition"><Edit2 size={16} /></button>
                               <button onClick={() => deleteItem('section_items', item.id)} className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-[4px] transition"><Trash2 size={16}/></button>
@@ -333,6 +394,88 @@ const Admin = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* ÁRAK KEZELÉSE */}
+          {activeTab === 'prices' && (
+            <div className="space-y-8">
+              {/* Új ár hozzáadása */}
+              <div className="bg-green-50 p-6 rounded-[8px] border border-green-100">
+                <h4 className="font-bold text-green-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új ár hozzáadása</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input 
+                    type="text" 
+                    placeholder="Megnevezés (pl. 3 tréning)" 
+                    value={newPrice.name}
+                    onChange={(e) => setNewPrice({...newPrice, name: e.target.value})}
+                    className="border border-green-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Ár (pl. 111 000 Ft)" 
+                    value={newPrice.price}
+                    onChange={(e) => setNewPrice({...newPrice, price: e.target.value})}
+                    className="border border-green-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none"
+                  />
+                  <div className="md:col-span-2 flex justify-end">
+                     <button 
+                       onClick={addPrice} 
+                       className="bg-green-600 text-white px-6 py-2 rounded-[4px] hover:bg-green-700 transition shadow-md flex items-center gap-2"
+                     >
+                       Hozzáadás
+                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista */}
+              <div className="grid gap-4">
+                {data.prices.map(price => (
+                  <div key={price.id} className="bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                    
+                    <div className="flex-grow w-full">
+                       {editingPriceId === price.id ? (
+                         <div className="grid gap-2">
+                           <input 
+                             type="text" 
+                             value={editPriceData.name} 
+                             onChange={(e) => setEditPriceData({...editPriceData, name: e.target.value})}
+                             className="border border-primary rounded-[4px] px-3 py-1 w-full"
+                           />
+                           <input 
+                             type="text" 
+                             value={editPriceData.price} 
+                             onChange={(e) => setEditPriceData({...editPriceData, price: e.target.value})}
+                             className="border border-gray-300 rounded-[4px] px-3 py-1 w-full"
+                           />
+                           <div className="flex gap-2 mt-2">
+                             <button onClick={() => updatePrice(price.id)} className="bg-green-50 text-green-600 px-3 py-1 rounded-[4px] text-sm hover:bg-green-100 flex items-center gap-1"><Check size={14}/> Mentés</button>
+                             <button onClick={() => setEditingPriceId(null)} className="bg-gray-50 text-gray-500 px-3 py-1 rounded-[4px] text-sm hover:bg-gray-100 flex items-center gap-1"><X size={14}/> Mégse</button>
+                           </div>
+                         </div>
+                       ) : (
+                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full">
+                           <h4 className="font-medium text-dark text-lg">{price.name}</h4>
+                           <span className="font-bold text-primary text-xl">{price.price}</span>
+                         </div>
+                       )}
+                    </div>
+
+                    {/* Műveletek */}
+                    <div className="flex gap-2 self-end md:self-center">
+                      {editingPriceId !== price.id && (
+                        <>
+                          <button onClick={() => startEditingPrice(price)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-[4px] transition"><Edit2 size={18} /></button>
+                          <button onClick={() => deleteItem('prices', price.id)} className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-[4px] transition"><Trash2 size={18}/></button>
+                        </>
+                      )}
+                    </div>
+
+                  </div>
+                ))}
+                {data.prices.length === 0 && <p className="text-center text-gray-500 py-8">Még nincsenek feltöltött árak.</p>}
+              </div>
             </div>
           )}
 

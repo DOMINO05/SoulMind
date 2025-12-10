@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Services from './pages/Services';
+import Prices from './pages/Prices';
 import Team from './pages/Team';
 import Application from './pages/Application';
 import Admin from './pages/Admin';
@@ -26,6 +27,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/szolgaltatasok" element={<Services />} />
+              <Route path="/araink" element={<Prices />} />
               <Route path="/munkatarsak" element={<Team />} />
               <Route path="/kotetek" element={<Volumes />} />
               <Route path="/jelentkezes" element={<Application />} />
