@@ -21,8 +21,8 @@ const Services = () => {
     const fetchData = async () => {
       try {
         const [secRes, itemRes] = await Promise.all([
-          supabase.from('sections').select('*').order('id'),
-          supabase.from('section_items').select('*')
+          supabase.from('sections').select('*').order('id', { ascending: true }),
+          supabase.from('section_items').select('*').order('id', { ascending: true })
         ]);
         if (secRes.data) setSections(secRes.data);
         if (itemRes.data) setSectionItems(itemRes.data);
@@ -37,12 +37,10 @@ const Services = () => {
 
   const getItems = (secId) => sectionItems.filter(i => i.section_id === secId);
 
-  // Sections to show on this page
-  const allowedSections = [
-    'Műhelyek', 
-    'Előadások', 
-    'Csoportfoglalkozások', 
-    'Pszichológusi tevékenység'
+  // Sections to exclude (Tréningek is on Home, Kötetek is on Volumes/Home)
+  const excludedSections = [
+    'Tréningek',
+    'A témákhoz kapcsolódó kötetek'
   ];
 
   const getSectionLayout = (index) => {
@@ -65,7 +63,7 @@ const Services = () => {
 
       <main>
         {sections
-          .filter(section => allowedSections.includes(section.name))
+          .filter(section => !excludedSections.includes(section.name))
           .map((section, index) => {
           const items = getItems(section.id);
           const isEven = index % 2 === 0;
