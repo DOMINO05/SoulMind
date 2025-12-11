@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/soulmind-login-2025" replace />;
   }
 
   return children;

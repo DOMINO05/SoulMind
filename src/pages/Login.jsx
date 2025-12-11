@@ -21,7 +21,7 @@ const Login = () => {
       setError('Sikertelen bejelentkezés. Ellenőrizd az adataidat!');
       setLoading(false);
     } else {
-      navigate('/admin');
+      navigate('/soulmind-control-2025');
     }
   };
 
@@ -62,10 +62,6 @@ const Login = () => {
             {loading ? 'Belépés...' : 'Belépés'}
           </button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-gray-500">
-          Nincs még fiókod? <Link to="/register" className="text-primary hover:underline">Regisztráció</Link>
-        </div>
       </div>
     </div>
   );

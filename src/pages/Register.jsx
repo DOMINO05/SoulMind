@@ -31,7 +31,7 @@ const Register = () => {
       setLoading(false);
     } else {
       alert("Sikeres regisztráció! Most már bejelentkezhetsz.");
-      navigate('/login');
+      navigate('/soulmind-login-2025');
     }
   };
 
@@ -84,10 +84,6 @@ const Register = () => {
             {loading ? 'Regisztráció...' : 'Regisztráció'}
           </button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-gray-500">
-          Már van fiókod? <Link to="/login" className="text-primary hover:underline">Bejelentkezés</Link>
-        </div>
       </div>
     </div>
   );

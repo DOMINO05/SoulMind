@@ -54,7 +54,6 @@ const Navbar = () => {
             >
               JELENTKEZZ
             </NavLink>
-            <NavLink to="/admin" className={navLinkClass}>Admin</NavLink>
           </div>
 
           <div className="md:hidden">
@@ -74,7 +73,6 @@ const Navbar = () => {
           <Link to="/munkatarsak" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Munkatársak</Link>
           <Link to="/kotetek" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Kötetek</Link>
           <Link to="/jelentkezes" onClick={() => setIsOpen(false)} className="text-primary font-bold hover:text-dark">JELENTKEZZ</Link>
-          <Link to="/admin" onClick={() => setIsOpen(false)} className="text-dark font-medium hover:text-primary">Admin</Link>
         </div>
       )}
     </nav>

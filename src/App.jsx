@@ -31,10 +31,10 @@ function App() {
               <Route path="/munkatarsak" element={<Team />} />
               <Route path="/kotetek" element={<Volumes />} />
               <Route path="/jelentkezes" element={<Application />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/soulmind-login-2025" element={<Login />} />
+              <Route path="/soulmind-register-2025" element={<Register />} />
               <Route 
-                path="/admin" 
+                path="/soulmind-control-2025" 
                 element={
                   <ProtectedRoute>
                     <Admin />
