@@ -16,21 +16,57 @@ const Login = () => {
   useEffect(() => {
     const fetchIpAndCheckAccess = async () => {
       try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        setIpAddress(data.ip);
-
-        // Check if IP is banned
-        const { data: accessData, error: rpcError } = await supabase.rpc('check_access', { request_ip: data.ip });
+        let ip = null;
         
-        if (rpcError) throw rpcError;
-
-        if (!accessData.allowed) {
-          setIsLocked(true);
-          setError(accessData.error || 'Hozzáférés megtagadva.');
-        } else {
-          setIsLocked(false);
+        // Próbálkozás 1: ipify
+        try {
+          const res = await fetch('https://api.ipify.org?format=json');
+          const data = await res.json();
+          ip = data.ip;
+        } catch (e) {
+          console.warn('IPify failed, trying fallback...', e);
         }
+
+        // Próbálkozás 2: seeip (Fallback)
+        if (!ip) {
+          try {
+            const res = await fetch('https://api.seeip.org/jsonip');
+            const data = await res.json();
+            ip = data.ip;
+          } catch (e) {
+            console.warn('SeeIP failed, trying fallback...', e);
+          }
+        }
+
+        // Próbálkozás 3: bigdatacloud (Fallback)
+        if (!ip) {
+          try {
+            const res = await fetch('https://api.bigdatacloud.net/data/client-ip');
+            const data = await res.json();
+            ip = data.ipString;
+          } catch (e) {
+            console.error('All IP services failed', e);
+          }
+        }
+
+        if (ip) {
+          setIpAddress(ip);
+          
+          // Check if IP is banned
+          const { data: accessData, error: rpcError } = await supabase.rpc('check_access', { request_ip: ip });
+          
+          if (rpcError) throw rpcError;
+
+          if (!accessData.allowed) {
+            setIsLocked(true);
+            setError(accessData.error || 'Hozzáférés megtagadva.');
+          } else {
+            setIsLocked(false);
+          }
+        } else {
+            setError('Nem sikerült az IP cím lekérése. Ellenőrizd az internetkapcsolatot.');
+        }
+
       } catch (err) {
         console.error('Error checking access:', err);
       }
