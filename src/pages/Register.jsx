@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
 const Register = () => {
   const { signUp } = useAuth();
@@ -10,36 +11,59 @@ const Register = () => {
   const [secretCode, setSecretCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Lockout State
-  const [attempts, setAttempts] = useState(() => parseInt(localStorage.getItem('register_attempts') || '0'));
-  const [lockoutTime, setLockoutTime] = useState(() => parseInt(localStorage.getItem('register_lockout') || '0'));
+  const [ipAddress, setIpAddress] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    if (Date.now() < lockoutTime) {
-      const remaining = Math.ceil((lockoutTime - Date.now()) / 60000);
-      setError(`Túl sok próbálkozás. Kérlek várj ${remaining} percet.`);
-    } else if (attempts >= 3 && lockoutTime > 0 && Date.now() > lockoutTime) {
-        // Clear lockout if time passed
-        localStorage.removeItem('register_lockout');
-        localStorage.setItem('register_attempts', '0');
-        setLockoutTime(0);
-        setAttempts(0);
-        setError('');
-    }
-  }, [lockoutTime, attempts]);
+    const fetchIpAndCheckAccess = async () => {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        setIpAddress(data.ip);
+
+        // Check if IP is banned
+        const { data: accessData, error: rpcError } = await supabase.rpc('check_access', { request_ip: data.ip });
+        
+        if (rpcError) throw rpcError;
+
+        if (!accessData.allowed) {
+          setIsLocked(true);
+          setError(accessData.error || 'Hozzáférés megtagadva.');
+        } else {
+          setIsLocked(false);
+        }
+      } catch (err) {
+        console.error('Error checking access:', err);
+      }
+    };
+
+    fetchIpAndCheckAccess();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (Date.now() < lockoutTime) {
-        const remaining = Math.ceil((lockoutTime - Date.now()) / 60000);
-        setError(`Túl sok próbálkozás. Kérlek várj ${remaining} percet.`);
+    if (isLocked) {
+        setError('Túl sok próbálkozás. Kérlek várj.');
         return;
     }
 
+    if (!ipAddress) {
+      setError('Nem sikerült azonosítani az IP címet. Kérlek kapcsold ki a reklámblokkolót.');
+      return;
+    }
+
     setLoading(true);
+
+    // Double check before attempting registration
+    const { data: accessData } = await supabase.rpc('check_access', { request_ip: ipAddress });
+    if (accessData && !accessData.allowed) {
+      setIsLocked(true);
+      setError(accessData.error);
+      setLoading(false);
+      return;
+    }
     
     const { error: signUpError } = await signUp({ 
       email, 
@@ -52,23 +76,20 @@ const Register = () => {
     });
     
     if (signUpError) {
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
-      localStorage.setItem('register_attempts', newAttempts);
+      await supabase.rpc('log_failure', { request_ip: ipAddress });
       
-      if (newAttempts >= 3) {
-        const lockUntil = Date.now() + 15 * 60 * 1000; // 15 perc
-        setLockoutTime(lockUntil);
-        localStorage.setItem('register_lockout', lockUntil);
-        setError('Túl sok sikertelen próbálkozás. 15 percre letiltottunk.');
+      // Re-check status to see if they got banned just now
+      const { data: newAccessData } = await supabase.rpc('check_access', { request_ip: ipAddress });
+      if (newAccessData && !newAccessData.allowed) {
+        setIsLocked(true);
+        setError(newAccessData.error);
       } else {
-        setError(`${signUpError.message} (Maradék próbálkozás: ${3 - newAttempts})`);
+        setError(`${signUpError.message}`);
       }
       setLoading(false);
     } else {
       // Success
-      localStorage.removeItem('register_attempts');
-      localStorage.removeItem('register_lockout');
+      await supabase.rpc('reset_access', { request_ip: ipAddress });
       alert("Sikeres regisztráció! Most már bejelentkezhetsz.");
       navigate('/soulmind-login-2025');
     }
@@ -90,7 +111,7 @@ const Register = () => {
               className="w-full px-4 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-primary outline-none disabled:bg-gray-100 disabled:text-gray-400"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              disabled={Date.now() < lockoutTime}
+              disabled={isLocked || loading}
             />
           </div>
           
@@ -102,7 +123,7 @@ const Register = () => {
               className="w-full px-4 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-primary outline-none disabled:bg-gray-100 disabled:text-gray-400"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              disabled={Date.now() < lockoutTime}
+              disabled={isLocked || loading}
             />
           </div>
 
@@ -115,12 +136,12 @@ const Register = () => {
               className="w-full px-4 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-primary outline-none disabled:bg-gray-100 disabled:text-gray-400"
               value={secretCode}
               onChange={e => setSecretCode(e.target.value)}
-              disabled={Date.now() < lockoutTime}
+              disabled={isLocked || loading}
             />
           </div>
 
           <button 
-            disabled={loading || Date.now() < lockoutTime}
+            disabled={loading || isLocked}
             className="w-full py-3 bg-primary text-white font-bold rounded hover:bg-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Regisztráció...' : 'Regisztráció'}
