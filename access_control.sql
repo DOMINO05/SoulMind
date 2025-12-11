@@ -10,15 +10,22 @@ CREATE OR REPLACE FUNCTION public.get_client_ip()
 RETURNS TEXT AS $$
 DECLARE
     headers jsonb;
+    ip text;
 BEGIN
     -- Get headers from the current request
-    headers := current_setting('request.headers', true)::jsonb;
+    BEGIN
+        headers := current_setting('request.headers', true)::jsonb;
+    EXCEPTION WHEN OTHERS THEN
+        headers := '{}'::jsonb;
+    END;
     
     -- Try to get the IP from 'cf-connecting-ip' (Cloudflare) or 'x-forwarded-for'
-    RETURN COALESCE(
+    ip := COALESCE(
         headers->>'cf-connecting-ip',
         (regexp_split_to_array(headers->>'x-forwarded-for', ','))[1]
     );
+    
+    RETURN ip;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -33,10 +40,9 @@ BEGIN
     -- Get IP automatically
     request_ip := public.get_client_ip();
 
-    -- If IP cannot be determined (should not happen in HTTP context), allow but warn? 
-    -- Or just proceed.
+    -- Return early if IP is null (shouldn't happen in prod, but maybe in local dev)
     IF request_ip IS NULL THEN
-        RETURN json_build_object('allowed', true, 'warning', 'Could not determine IP');
+        RETURN json_build_object('allowed', true, 'warning', 'No IP detected');
     END IF;
 
     SELECT * INTO record FROM public.access_control WHERE ip_address = request_ip;
@@ -46,11 +52,12 @@ BEGIN
         result := json_build_object(
             'allowed', false, 
             'error', 'Túl sok sikertelen próbálkozás. Kérlek várj.',
-            'lockout_until', record.lockout_until
+            'lockout_until', record.lockout_until,
+            'ip', request_ip
         );
     ELSE
         -- IP is not locked out (or record doesn't exist)
-        result := json_build_object('allowed', true);
+        result := json_build_object('allowed', true, 'ip', request_ip);
         
         -- If lockout time passed, reset the record
         IF record.lockout_until IS NOT NULL AND record.lockout_until <= NOW() THEN

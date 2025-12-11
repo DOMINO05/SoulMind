@@ -19,6 +19,8 @@ const Login = () => {
         const { data: accessData, error: rpcError } = await supabase.rpc('check_access');
         
         if (rpcError) throw rpcError;
+        
+        console.log('Access Check:', accessData); // Debug IP detection
 
         if (accessData && !accessData.allowed) {
           setIsLocked(true);
