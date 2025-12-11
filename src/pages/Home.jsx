@@ -15,13 +15,13 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [secRes, itemRes, trainRes] = await Promise.all([
+        const [secRes, , trainRes] = await Promise.all([
           supabase.from('sections').select('*').order('id'),
           supabase.from('section_items').select('*'),
           supabase.from('trainings').select('*')
         ]);
         if (secRes.data) setSections(secRes.data);
-        if (itemRes.data) setSectionItems(itemRes.data);
+        // if (itemRes.data) setSectionItems(itemRes.data);
         if (trainRes.data) setTrainings(trainRes.data);
       } catch (error) {
         console.error("Hiba:", error);
@@ -32,7 +32,7 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const getItems = (secId) => sectionItems.filter(i => i.section_id === secId);
+  // const getItems = (secId) => sectionItems.filter(i => i.section_id === secId);
 
   const downloadImage = async (url, filename) => {
     try {

@@ -1,15 +1,29 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { applicationSchema } from '../lib/schemas';
 
 const Application = () => {
   const [formData, setFormData] = useState({
     full_name: '', phone: '', email: '', interests: '', gdpr: false
   });
   const [status, setStatus] = useState('idle');
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.gdpr) return alert('GDPR elfogadása kötelező!');
+    setErrors({});
+    
+    // Validation
+    const validation = applicationSchema.safeParse(formData);
+    if (!validation.success) {
+      const fieldErrors = {};
+      validation.error.errors.forEach(err => {
+        if (err.path[0]) fieldErrors[err.path[0]] = err.message;
+      });
+      setErrors(fieldErrors);
+      if (fieldErrors.gdpr) alert(fieldErrors.gdpr);
+      return;
+    }
     
     setStatus('submitting');
     const { error } = await supabase.from('questionnaire').insert({
@@ -55,10 +69,11 @@ const Application = () => {
                   <input 
                     required 
                     type={field === 'email' ? 'email' : 'text'}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                    className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-2 outline-none transition-all ${errors[field] ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:ring-primary focus:border-primary'}`}
                     value={formData[field]}
                     onChange={e => setFormData({...formData, [field]: e.target.value})}
                   />
+                  {errors[field] && <p className="text-red-500 text-xs mt-1">{errors[field]}</p>}
                 </div>
               ))}
               

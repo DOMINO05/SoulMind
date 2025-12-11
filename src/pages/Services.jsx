@@ -43,10 +43,6 @@ const Services = () => {
     'A témákhoz kapcsolódó kötetek'
   ];
 
-  const getSectionLayout = (index) => {
-    // Keeping the original creative layout logic
-    return 'flex flex-col md:flex-row items-start gap-12'; 
-  };
 
   const ctaTexts = ["Jelentkezem", "Érdekel", "Csatlakozom", "Részletek"];
 

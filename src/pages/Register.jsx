@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { registerSchema } from '../lib/schemas';
 
 const Register = () => {
   const { signUp } = useAuth();
@@ -47,6 +48,13 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Input Validation
+    const validation = registerSchema.safeParse({ email, password, secretCode });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      return;
+    }
 
     if (isLocked) {
         setError('Túl sok próbálkozás. Kérlek várj.');
