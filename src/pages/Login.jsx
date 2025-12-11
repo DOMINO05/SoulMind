@@ -11,16 +11,25 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [deviceId, setDeviceId] = useState('');
 
   useEffect(() => {
+    // Get or Create Device ID
+    let id = localStorage.getItem('soulmind_device_id');
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('soulmind_device_id', id);
+    }
+    setDeviceId(id);
+
     const checkAccess = async () => {
       try {
-        // Check if IP is banned (server-side detection)
-        const { data: accessData, error: rpcError } = await supabase.rpc('check_access');
+        // Check access with Device ID
+        const { data: accessData, error: rpcError } = await supabase.rpc('check_access', { device_id: id });
         
         if (rpcError) throw rpcError;
         
-        console.log('Access Check:', accessData); // Debug IP detection
+        console.log('Access Check:', accessData);
 
         if (accessData && !accessData.allowed) {
           setIsLocked(true);
@@ -33,7 +42,7 @@ const Login = () => {
       }
     };
 
-    checkAccess();
+    if (id) checkAccess();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -48,7 +57,7 @@ const Login = () => {
     setLoading(true);
 
     // Double check before attempting login
-    const { data: accessData } = await supabase.rpc('check_access');
+    const { data: accessData } = await supabase.rpc('check_access', { device_id: deviceId });
     if (accessData && !accessData.allowed) {
       setIsLocked(true);
       setError(accessData.error);
@@ -59,10 +68,10 @@ const Login = () => {
     const { error: signInError } = await signIn({ email, password });
     
     if (signInError) {
-      await supabase.rpc('log_failure');
+      await supabase.rpc('log_failure', { device_id: deviceId });
       
-      // Re-check status to see if they got banned just now
-      const { data: newAccessData } = await supabase.rpc('check_access');
+      // Re-check status
+      const { data: newAccessData } = await supabase.rpc('check_access', { device_id: deviceId });
       if (newAccessData && !newAccessData.allowed) {
         setIsLocked(true);
         setError(newAccessData.error);
@@ -73,7 +82,7 @@ const Login = () => {
       setLoading(false);
     } else {
       // Success
-      await supabase.rpc('reset_access');
+      await supabase.rpc('reset_access', { device_id: deviceId });
       navigate('/soulmind-control-2025');
     }
   };

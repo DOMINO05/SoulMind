@@ -1,6 +1,7 @@
--- Create the table for tracking access attempts
-CREATE TABLE IF NOT EXISTS public.access_control (
-    ip_address TEXT PRIMARY KEY,
+-- Re-create the table to support both IP and Device ID tracking
+DROP TABLE IF EXISTS public.access_control;
+CREATE TABLE public.access_control (
+    target TEXT PRIMARY KEY, -- Can be an IP address or a Device ID
     failed_attempts INTEGER DEFAULT 0,
     lockout_until TIMESTAMP WITH TIME ZONE
 );
@@ -12,14 +13,12 @@ DECLARE
     headers jsonb;
     ip text;
 BEGIN
-    -- Get headers from the current request
     BEGIN
         headers := current_setting('request.headers', true)::jsonb;
     EXCEPTION WHEN OTHERS THEN
         headers := '{}'::jsonb;
     END;
     
-    -- Try to get the IP from 'cf-connecting-ip' (Cloudflare) or 'x-forwarded-for'
     ip := COALESCE(
         headers->>'cf-connecting-ip',
         (regexp_split_to_array(headers->>'x-forwarded-for', ','))[1]
@@ -29,90 +28,112 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Function to check if the current user (by IP) is allowed to access
-CREATE OR REPLACE FUNCTION public.check_access()
+-- Function to check access for a specific device and the current IP
+CREATE OR REPLACE FUNCTION public.check_access(device_id TEXT)
 RETURNS JSON AS $$
 DECLARE
     request_ip TEXT;
-    record RECORD;
+    ip_record RECORD;
+    device_record RECORD;
     result JSON;
 BEGIN
-    -- Get IP automatically
     request_ip := public.get_client_ip();
 
-    -- Return early if IP is null (shouldn't happen in prod, but maybe in local dev)
-    IF request_ip IS NULL THEN
-        RETURN json_build_object('allowed', true, 'warning', 'No IP detected');
-    END IF;
-
-    SELECT * INTO record FROM public.access_control WHERE ip_address = request_ip;
-    
-    IF record.lockout_until IS NOT NULL AND record.lockout_until > NOW() THEN
-        -- IP is locked out
-        result := json_build_object(
-            'allowed', false, 
-            'error', 'Túl sok sikertelen próbálkozás. Kérlek várj.',
-            'lockout_until', record.lockout_until,
-            'ip', request_ip
-        );
-    ELSE
-        -- IP is not locked out (or record doesn't exist)
-        result := json_build_object('allowed', true, 'ip', request_ip);
-        
-        -- If lockout time passed, reset the record
-        IF record.lockout_until IS NOT NULL AND record.lockout_until <= NOW() THEN
-             UPDATE public.access_control 
-             SET failed_attempts = 0, lockout_until = NULL 
-             WHERE ip_address = request_ip;
-        END IF;
-    END IF;
-
-    RETURN result;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Function to log a failed attempt for the current IP
-CREATE OR REPLACE FUNCTION public.log_failure()
-RETURNS VOID AS $$
-DECLARE
-    request_ip TEXT;
-    record RECORD;
-    new_attempts INTEGER;
-BEGIN
-    request_ip := public.get_client_ip();
-    
-    IF request_ip IS NULL THEN RETURN; END IF;
-
-    SELECT * INTO record FROM public.access_control WHERE ip_address = request_ip;
-
-    IF record IS NULL THEN
-        INSERT INTO public.access_control (ip_address, failed_attempts) VALUES (request_ip, 1);
-    ELSE
-        new_attempts := record.failed_attempts + 1;
-        
-        IF new_attempts >= 3 THEN
-             -- Lock out for 15 minutes
-             UPDATE public.access_control 
-             SET failed_attempts = new_attempts, lockout_until = NOW() + INTERVAL '15 minutes'
-             WHERE ip_address = request_ip;
-        ELSE
-             UPDATE public.access_control 
-             SET failed_attempts = new_attempts
-             WHERE ip_address = request_ip;
-        END IF;
-    END IF;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Function to reset access upon successful login for the current IP
-CREATE OR REPLACE FUNCTION public.reset_access()
-RETURNS VOID AS $$
-DECLARE
-    request_ip TEXT;
-BEGIN
-    request_ip := public.get_client_ip();
+    -- Check IP Lockout (Global Block)
     IF request_ip IS NOT NULL THEN
-        DELETE FROM public.access_control WHERE ip_address = request_ip;
+        SELECT * INTO ip_record FROM public.access_control WHERE target = request_ip;
+        
+        IF ip_record.lockout_until IS NOT NULL AND ip_record.lockout_until > NOW() THEN
+            RETURN json_build_object(
+                'allowed', false, 
+                'error', 'Túl sok próbálkozás a hálózatodról. Kérlek várj.',
+                'lockout_until', ip_record.lockout_until,
+                'block_type', 'ip'
+            );
+        END IF;
+    END IF;
+
+    -- Check Device Lockout (Local Block)
+    IF device_id IS NOT NULL THEN
+        SELECT * INTO device_record FROM public.access_control WHERE target = device_id;
+        
+        IF device_record.lockout_until IS NOT NULL AND device_record.lockout_until > NOW() THEN
+            RETURN json_build_object(
+                'allowed', false, 
+                'error', 'Túl sok próbálkozás erről az eszközről. Kérlek várj.',
+                'lockout_until', device_record.lockout_until,
+                'block_type', 'device'
+            );
+        END IF;
+    END IF;
+    
+    -- If we get here, access is allowed
+    -- Check if we need to auto-reset expired locks
+    IF ip_record.lockout_until IS NOT NULL AND ip_record.lockout_until <= NOW() THEN
+         UPDATE public.access_control SET failed_attempts = 0, lockout_until = NULL WHERE target = request_ip;
+    END IF;
+    IF device_record.lockout_until IS NOT NULL AND device_record.lockout_until <= NOW() THEN
+         UPDATE public.access_control SET failed_attempts = 0, lockout_until = NULL WHERE target = device_id;
+    END IF;
+
+    RETURN json_build_object('allowed', true, 'ip', request_ip);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to log failure for both Device and IP
+CREATE OR REPLACE FUNCTION public.log_failure(device_id TEXT)
+RETURNS VOID AS $$
+DECLARE
+    request_ip TEXT;
+    
+    -- Limits
+    LIMIT_DEVICE INTEGER := 3;
+    LIMIT_IP INTEGER := 10;
+BEGIN
+    request_ip := public.get_client_ip();
+
+    -- 1. Log Device Failure
+    IF device_id IS NOT NULL THEN
+        INSERT INTO public.access_control (target, failed_attempts) VALUES (device_id, 1)
+        ON CONFLICT (target) DO UPDATE 
+        SET failed_attempts = access_control.failed_attempts + 1;
+        
+        -- Apply Device Lock if needed
+        UPDATE public.access_control 
+        SET lockout_until = NOW() + INTERVAL '15 minutes'
+        WHERE target = device_id AND failed_attempts >= LIMIT_DEVICE AND lockout_until IS NULL;
+    END IF;
+
+    -- 2. Log IP Failure
+    IF request_ip IS NOT NULL THEN
+        INSERT INTO public.access_control (target, failed_attempts) VALUES (request_ip, 1)
+        ON CONFLICT (target) DO UPDATE 
+        SET failed_attempts = access_control.failed_attempts + 1;
+
+        -- Apply IP Lock if needed
+        UPDATE public.access_control 
+        SET lockout_until = NOW() + INTERVAL '30 minutes'
+        WHERE target = request_ip AND failed_attempts >= LIMIT_IP AND lockout_until IS NULL;
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to reset access
+CREATE OR REPLACE FUNCTION public.reset_access(device_id TEXT)
+RETURNS VOID AS $$
+DECLARE
+    request_ip TEXT;
+BEGIN
+    request_ip := public.get_client_ip();
+    
+    -- Reset Device Record
+    IF device_id IS NOT NULL THEN
+        DELETE FROM public.access_control WHERE target = device_id;
+    END IF;
+
+    -- Reset IP Record
+    IF request_ip IS NOT NULL THEN
+        DELETE FROM public.access_control WHERE target = request_ip;
     END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

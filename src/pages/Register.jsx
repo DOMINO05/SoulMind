@@ -12,12 +12,21 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [deviceId, setDeviceId] = useState('');
 
   useEffect(() => {
+    // Get or Create Device ID
+    let id = localStorage.getItem('soulmind_device_id');
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('soulmind_device_id', id);
+    }
+    setDeviceId(id);
+
     const checkAccess = async () => {
       try {
-        // Check if IP is banned
-        const { data: accessData, error: rpcError } = await supabase.rpc('check_access');
+        // Check access with Device ID
+        const { data: accessData, error: rpcError } = await supabase.rpc('check_access', { device_id: id });
         
         if (rpcError) throw rpcError;
 
@@ -32,7 +41,7 @@ const Register = () => {
       }
     };
 
-    checkAccess();
+    if (id) checkAccess();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -47,7 +56,7 @@ const Register = () => {
     setLoading(true);
 
     // Double check before attempting registration
-    const { data: accessData } = await supabase.rpc('check_access');
+    const { data: accessData } = await supabase.rpc('check_access', { device_id: deviceId });
     if (accessData && !accessData.allowed) {
       setIsLocked(true);
       setError(accessData.error);
@@ -66,10 +75,10 @@ const Register = () => {
     });
     
     if (signUpError) {
-      await supabase.rpc('log_failure');
+      await supabase.rpc('log_failure', { device_id: deviceId });
       
-      // Re-check status to see if they got banned just now
-      const { data: newAccessData } = await supabase.rpc('check_access');
+      // Re-check status
+      const { data: newAccessData } = await supabase.rpc('check_access', { device_id: deviceId });
       if (newAccessData && !newAccessData.allowed) {
         setIsLocked(true);
         setError(newAccessData.error);
@@ -79,7 +88,7 @@ const Register = () => {
       setLoading(false);
     } else {
       // Success
-      await supabase.rpc('reset_access');
+      await supabase.rpc('reset_access', { device_id: deviceId });
       alert("Sikeres regisztráció! Most már bejelentkezhetsz.");
       navigate('/soulmind-login-2025');
     }
