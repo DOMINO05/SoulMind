@@ -11,69 +11,28 @@ const Register = () => {
   const [secretCode, setSecretCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [ipAddress, setIpAddress] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
-    const fetchIpAndCheckAccess = async () => {
+    const checkAccess = async () => {
       try {
-        let ip = null;
+        // Check if IP is banned
+        const { data: accessData, error: rpcError } = await supabase.rpc('check_access');
         
-        // Próbálkozás 1: ipify
-        try {
-          const res = await fetch('https://api.ipify.org?format=json');
-          const data = await res.json();
-          ip = data.ip;
-        } catch (e) {
-          console.warn('IPify failed, trying fallback...', e);
-        }
+        if (rpcError) throw rpcError;
 
-        // Próbálkozás 2: seeip (Fallback)
-        if (!ip) {
-          try {
-            const res = await fetch('https://api.seeip.org/jsonip');
-            const data = await res.json();
-            ip = data.ip;
-          } catch (e) {
-            console.warn('SeeIP failed, trying fallback...', e);
-          }
-        }
-
-        // Próbálkozás 3: bigdatacloud (Fallback)
-        if (!ip) {
-          try {
-            const res = await fetch('https://api.bigdatacloud.net/data/client-ip');
-            const data = await res.json();
-            ip = data.ipString;
-          } catch (e) {
-            console.error('All IP services failed', e);
-          }
-        }
-
-        if (ip) {
-          setIpAddress(ip);
-          
-          // Check if IP is banned
-          const { data: accessData, error: rpcError } = await supabase.rpc('check_access', { request_ip: ip });
-          
-          if (rpcError) throw rpcError;
-
-          if (!accessData.allowed) {
-            setIsLocked(true);
-            setError(accessData.error || 'Hozzáférés megtagadva.');
-          } else {
-            setIsLocked(false);
-          }
+        if (accessData && !accessData.allowed) {
+          setIsLocked(true);
+          setError(accessData.error || 'Hozzáférés megtagadva.');
         } else {
-            setError('Nem sikerült az IP cím lekérése. Ellenőrizd az internetkapcsolatot.');
+          setIsLocked(false);
         }
-
       } catch (err) {
         console.error('Error checking access:', err);
       }
     };
 
-    fetchIpAndCheckAccess();
+    checkAccess();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -85,15 +44,10 @@ const Register = () => {
         return;
     }
 
-    if (!ipAddress) {
-      setError('Nem sikerült azonosítani az IP címet. Kérlek kapcsold ki a reklámblokkolót.');
-      return;
-    }
-
     setLoading(true);
 
     // Double check before attempting registration
-    const { data: accessData } = await supabase.rpc('check_access', { request_ip: ipAddress });
+    const { data: accessData } = await supabase.rpc('check_access');
     if (accessData && !accessData.allowed) {
       setIsLocked(true);
       setError(accessData.error);
@@ -112,10 +66,10 @@ const Register = () => {
     });
     
     if (signUpError) {
-      await supabase.rpc('log_failure', { request_ip: ipAddress });
+      await supabase.rpc('log_failure');
       
       // Re-check status to see if they got banned just now
-      const { data: newAccessData } = await supabase.rpc('check_access', { request_ip: ipAddress });
+      const { data: newAccessData } = await supabase.rpc('check_access');
       if (newAccessData && !newAccessData.allowed) {
         setIsLocked(true);
         setError(newAccessData.error);
@@ -125,7 +79,7 @@ const Register = () => {
       setLoading(false);
     } else {
       // Success
-      await supabase.rpc('reset_access', { request_ip: ipAddress });
+      await supabase.rpc('reset_access');
       alert("Sikeres regisztráció! Most már bejelentkezhetsz.");
       navigate('/soulmind-login-2025');
     }
