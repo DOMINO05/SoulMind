@@ -11,7 +11,7 @@
       // string into just a query string, and then redirects the browser
       // to the new url with only a query string and hash fragment,
       // e.g. https://www.foo.com/bar/baz --> https://www.foo.com/?p=/bar/baz
-      var segmentCount = 1;
+      var segmentCount = 0;
       var l = window.location;
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +

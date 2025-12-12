@@ -17,7 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <BrowserRouter basename="/SoulMind">
+    <BrowserRouter basename="/">
       <AuthProvider>
         <ScrollToTop />
         
