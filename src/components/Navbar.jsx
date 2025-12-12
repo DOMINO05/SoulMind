@@ -37,7 +37,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <Link to="/" className={`text-2xl font-serif font-bold tracking-wider transition-colors duration-300 ${isDarkText ? 'text-dark' : 'text-white drop-shadow-md'} flex items-center gap-2`}>
-            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="SoulMind" className="h-24 md:h-28 w-auto max-w-[calc(100vw-6rem)]" />
+            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="SoulMind" className="h-16 md:h-20 w-auto max-w-[calc(100vw-6rem)]" />
           </Link>
           
           <div className="hidden md:flex space-x-10 items-center">
