@@ -57,7 +57,11 @@ const Navbar = () => {
           </div>
 
           <div className="md:hidden">
-            <button onClick={() => setIsOpen(!isOpen)} className={isDarkText ? 'text-dark' : 'text-white'}>
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className={isDarkText ? 'text-dark' : 'text-white'}
+              aria-label="Toggle menu"
+            >
               {isOpen ? <X /> : <Menu />}
             </button>
           </div>
