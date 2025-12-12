@@ -44,7 +44,7 @@ const Application = () => {
 
   return (
     <div className="min-h-screen pt-24 bg-light flex items-center justify-center px-4 py-12 animate-fade-in">
-      {/* Itt a fade-in-up animáció a konténeren */}
+      {/* Container with fade-in-up animation */}
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden mt-5 border border-gray-100 animate-fade-in-up">
         <div className="bg-primary p-8 text-center">
           <h2 className="text-3xl font-serif font-bold text-white">Jelentkezés</h2>

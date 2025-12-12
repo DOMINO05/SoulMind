@@ -34,24 +34,9 @@ describe('Navbar Component', () => {
     expect(toggleButton).toBeInTheDocument();
 
     // Menu should be closed initially
-    // We can't easily check for visibility of mobile menu links because they are conditional render.
-    // We need to check if they are in document.
-    // However, desktop links are also in document.
-    // The mobile menu adds duplicates of links.
-    // Desktop: <NavLink>
-    // Mobile: <Link>
-    
-    // Let's click the button
     fireEvent.click(toggleButton);
     
-    // Now mobile menu items should be present.
-    // Since desktop items are also there, we expect more items.
-    // Or we can check if the mobile container div exists? It has specific classes.
-    // "absolute top-full left-0 w-full"
-    
-    // Or simpler: check if the 'Főoldal' link count increased (1 desktop + 1 mobile = 2)
-    // Initially it might be 1 (desktop)
-    
+    // Mobile menu items should now be present (desktop + mobile versions)
     const homeLinks = screen.getAllByText('Főoldal');
     expect(homeLinks.length).toBeGreaterThan(0);
   });

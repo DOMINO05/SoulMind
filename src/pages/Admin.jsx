@@ -15,25 +15,25 @@ const Admin = () => {
   const [targetSec, setTargetSec] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const [editDetails, setEditDetails] = useState(''); // New for details
+  const [editDetails, setEditDetails] = useState('');
 
-  // New Section State
+  // Section State
   const [newSectionName, setNewSectionName] = useState('');
   const [editingSectionId, setEditingSectionId] = useState(null);
   const [editSectionName, setEditSectionName] = useState('');
 
-  // New Price State
+  // Price State
   const [newPrice, setNewPrice] = useState({ name: '', price: '' });
   const [editingPriceId, setEditingPriceId] = useState(null);
   const [editPriceData, setEditPriceData] = useState({ name: '', price: '' });
 
-  // New Volume State
+  // Volume State
   const [newVolume, setNewVolume] = useState({ title: '', link: '' });
   const [volumeImage, setVolumeImage] = useState(null);
   const [editingVolumeId, setEditingVolumeId] = useState(null);
   const [editVolumeData, setEditVolumeData] = useState({ title: '', link: '' });
 
-  // New Team State
+  // Team State
   const [newMember, setNewMember] = useState({ name: '', bio: '' });
   const [memberImage, setMemberImage] = useState(null);
   const [editingMemberId, setEditingMemberId] = useState(null);
@@ -66,7 +66,7 @@ const Admin = () => {
 
   const triggerRefresh = () => setRefresh(p => p + 1);
 
-  // --- CRUD Műveletek ---
+  // --- CRUD Operations ---
   const addItem = async (secId) => {
     if(!newItem.trim()) return;
     await supabase.from('section_items').insert({ section_id: secId, content: newItem });
@@ -328,7 +328,6 @@ const Admin = () => {
     }
   };
 
-  // FIX KEREKÍTÉS: rounded-t-[10px] a rounded-t-lg helyett
   const TabButton = ({ id, label, icon: Icon }) => (
     <button 
       onClick={() => setActiveTab(id)}
@@ -350,10 +349,8 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pt-24 pb-12 px-2 md:px-4 animate-fade-in">
-      {/* FIX KEREKÍTÉS: rounded-[12px] */}
       <div className="max-w-7xl mt-5 mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
         
-        {/* FIX KEREKÍTÉS: rounded-t-[12px] */}
         <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] flex-wrap items-center">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
           <TabButton id="prices" label="Áraink" icon={DollarSign} />
@@ -377,11 +374,11 @@ const Admin = () => {
 
         <div key={activeTab} className="p-4 md:p-8 flex-grow animate-fade-in">
           
-          {/* TARTALOM SZERKESZTŐ */}
+          {/* CONTENT EDITOR */}
           {activeTab === 'sections' && (
             <div className="grid gap-8">
               
-              {/* Új Szekció Létrehozása */}
+              {/* Create New Section */}
               <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100 mb-4">
                 <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új Szekció Létrehozása</h4>
                 <div className="flex gap-4">
@@ -402,7 +399,6 @@ const Admin = () => {
               </div>
 
               {data.sections.filter(s => s.name !== 'Tréningek' && s.name !== 'A témákhoz kapcsolódó kötetek').map(sec => (
-                // FIX KEREKÍTÉS: rounded-[8px]
                 <div key={sec.id} className="bg-gray-50 p-4 md:p-6 rounded-[8px] border border-gray-200 transition-all hover:shadow-md">
                   
                   <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
@@ -433,7 +429,6 @@ const Admin = () => {
 
                   <ul className="space-y-3 mb-4">
                     {data.items.filter(i => i.section_id === sec.id).map(item => (
-                      // FIX KEREKÍTÉS: rounded-[6px]
                       <li key={item.id} className="bg-white p-3 rounded-[6px] border border-gray-100 shadow-sm">
                         {editingId === item.id ? (
                           <div className="flex flex-col gap-2 w-full animate-fade-in">
@@ -487,10 +482,10 @@ const Admin = () => {
             </div>
           )}
 
-          {/* ÁRAK KEZELÉSE */}
+          {/* PRICES MANAGEMENT */}
           {activeTab === 'prices' && (
             <div className="space-y-8">
-              {/* Új ár hozzáadása */}
+              {/* Add New Price */}
               <div className="bg-green-50 p-6 rounded-[8px] border border-green-100">
                 <h4 className="font-bold text-green-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új ár hozzáadása</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -519,7 +514,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              {/* Lista */}
+              {/* List */}
               <div className="grid gap-4">
                 {data.prices.map(price => (
                   <div key={price.id} className="bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -552,7 +547,7 @@ const Admin = () => {
                        )}
                     </div>
 
-                    {/* Műveletek */}
+                    {/* Operations */}
                     <div className="flex gap-2 self-end md:self-center">
                       {editingPriceId !== price.id && (
                         <>
@@ -569,10 +564,10 @@ const Admin = () => {
             </div>
           )}
 
-          {/* KÖTETEK KEZELÉSE */}
+          {/* VOLUMES MANAGEMENT */}
           {activeTab === 'volumes' && (
             <div className="space-y-8">
-              {/* Új kötet hozzáadása */}
+              {/* Add New Volume */}
               <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100">
                 <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új kötet hozzáadása</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -607,12 +602,12 @@ const Admin = () => {
                 </div>
               </div>
 
-              {/* Lista */}
+              {/* List */}
               <div className="grid gap-4">
                 {data.volumes.map(vol => (
                   <div key={vol.id} className="bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-center">
                     
-                    {/* Kép */}
+                    {/* Image */}
                     <div className="w-20 h-28 bg-gray-100 rounded-[4px] overflow-hidden flex-shrink-0">
                       {vol.image_path ? (
                         <img src={vol.image_path} alt={vol.title} className="w-full h-full object-cover" />
@@ -621,7 +616,7 @@ const Admin = () => {
                       )}
                     </div>
 
-                    {/* Tartalom */}
+                    {/* Content */}
                     <div className="flex-grow w-full">
                        {editingVolumeId === vol.id ? (
                          <div className="grid gap-2">
@@ -654,7 +649,7 @@ const Admin = () => {
                        )}
                     </div>
 
-                    {/* Műveletek */}
+                    {/* Operations */}
                     <div className="flex gap-2 self-end md:self-center">
                       {editingVolumeId !== vol.id && (
                         <>
@@ -671,10 +666,10 @@ const Admin = () => {
             </div>
           )}
 
-          {/* MUNKATÁRSAK KEZELÉSE */}
+          {/* TEAM MANAGEMENT */}
           {activeTab === 'team' && (
             <div className="space-y-8">
-              {/* Új munkatárs hozzáadása */}
+              {/* Add New Team Member */}
               <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100">
                 <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új munkatárs hozzáadása</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -710,12 +705,12 @@ const Admin = () => {
                 </div>
               </div>
 
-              {/* Lista */}
+              {/* List */}
               <div className="grid gap-4">
                 {data.team.map(member => (
                   <div key={member.id} className="bg-white p-4 rounded-[8px] border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
                     
-                    {/* Kép */}
+                    {/* Image */}
                     <div className="w-20 h-28 bg-gray-100 rounded-[4px] overflow-hidden flex-shrink-0">
                       {member.image_path ? (
                         <img src={member.image_path} alt={member.name} className="w-full h-full object-cover" />
@@ -724,7 +719,7 @@ const Admin = () => {
                       )}
                     </div>
 
-                    {/* Tartalom */}
+                    {/* Content */}
                     <div className="flex-grow w-full">
                        {editingMemberId === member.id ? (
                          <div className="grid gap-2">
@@ -752,7 +747,7 @@ const Admin = () => {
                        )}
                     </div>
 
-                    {/* Műveletek */}
+                    {/* Operations */}
                     <div className="flex gap-2 self-end md:self-start">
                       {editingMemberId !== member.id && (
                         <>
@@ -769,7 +764,7 @@ const Admin = () => {
             </div>
           )}
 
-          {/* GALÉRIA */}
+          {/* GALLERY */}
           {activeTab === 'trainings' && (
             <div>
               <div className="mb-8 flex flex-col sm:flex-row justify-between items-center bg-blue-50 p-6 rounded-[8px] border border-blue-100 gap-4">
@@ -801,10 +796,10 @@ const Admin = () => {
             </div>
           )}
 
-          {/* JELENTKEZÉSEK - TÁBLÁZAT JAVÍTÁS */}
+          {/* RESPONSES */}
           {activeTab === 'responses' && (
             <div>
-              {/* Desktop Nézet */}
+              {/* Desktop View */}
               <div className="hidden md:block overflow-x-auto rounded-[8px] border border-gray-200">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -836,7 +831,7 @@ const Admin = () => {
                 </table>
               </div>
 
-              {/* Mobil Nézet */}
+              {/* Mobile View */}
               <div className="md:hidden flex flex-col gap-4">
                 {data.responses.map(r => (
                   <div key={r.id} className="bg-white border border-gray-200 rounded-[8px] p-4 shadow-sm hover:shadow-md transition-shadow">

@@ -65,7 +65,7 @@ const Volumes = () => {
 
               return (
                 <Tag key={volume.id} {...props}>
-                  {/* Kép */}
+                  {/* Image */}
                   <div className="aspect-[5/7] overflow-hidden bg-gray-50 relative group">
                      {volume.image_path ? (
                        <img 
@@ -81,7 +81,7 @@ const Volumes = () => {
                      {hasLink && <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300"></div>}
                   </div>
 
-                  {/* Szöveg */}
+                  {/* Text */}
                   <div className="p-6 flex-grow flex flex-col justify-between">
                     <div>
                       <h3 className={`text-xl font-bold text-dark mb-2 transition-colors ${hasLink ? 'group-hover:text-primary' : ''}`}>

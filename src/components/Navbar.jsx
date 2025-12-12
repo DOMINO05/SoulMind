@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom'; // useLocation importálása
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation(); // Aktuális oldal lekérése
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -13,11 +13,7 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- JAVÍTOTT LOGIKA ---
-  // Mikor legyen sötét a szöveg?
-  // 1. Ha görgettünk (scrolled) -> Fehér a háttér, sötét a szöveg.
-  // 2. Ha nyitva a menü (isOpen) -> Fehér háttér, sötét szöveg.
-  // 3. HA NEM A FŐOLDALON VAGYUNK (location.pathname !== '/') -> Admin/Kérdőív oldalon mindig sötét kell.
+  // Determine text color: dark if scrolled, menu open, or not on home page
   const isDarkText = scrolled || isOpen || location.pathname !== '/';
 
   const navLinkClass = ({ isActive }) => 
@@ -27,7 +23,7 @@ const Navbar = () => {
         : isDarkText ? 'text-gray-600 hover:text-primary' : 'text-gray-200 hover:text-white'
     }`;
 
-  // Háttér logika: Görgetésnél VAGY nyitott menünél legyen fehér alap
+  // Background logic: white background on scroll or when menu is open
   const showWhiteBg = scrolled || isOpen;
 
   return (

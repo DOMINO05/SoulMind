@@ -5,11 +5,11 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Azonnali ugrás a tetejére (0, 0 koordináta)
+    // Immediate scroll to top
     window.scrollTo(0, 0);
-  }, [pathname]); // Minden alkalommal lefut, ha változik az URL (pathname)
+  }, [pathname]);
 
-  return null; // Ez a komponens nem renderel semmit a képernyőre
+  return null;
 };
 
 export default ScrollToTop;
