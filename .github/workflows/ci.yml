@@ -2,15 +2,15 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main, master, stilus ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main, master, stilus ]
+    branches: [ main, master ]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,14 +34,5 @@ jobs:
     - name: Build
       run: npm run build
       env:
-        # For CI build, dummies work because env vars are baked at build time.
-        # But for the app to work, these secrets MUST be set in GitHub Repo Settings > Secrets
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-
-    - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/stilus')
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: dist # The folder the action should deploy.
-        branch: gh-pages # The branch the action should deploy to.
