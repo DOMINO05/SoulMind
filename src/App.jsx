@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -17,7 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <HashRouter>
+    <BrowserRouter basename="/SoulMind">
       <AuthProvider>
         <ScrollToTop />
         
@@ -47,7 +47,7 @@ function App() {
           <FloatingCTA />
         </div>
       </AuthProvider>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
 

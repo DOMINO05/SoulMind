@@ -24,7 +24,7 @@ const FloatingCTA = () => {
   }, [location.pathname]);
   
   // Ne jelenjen meg a Jelentkezés oldalon és az Admin felületen
-  if (['/jelentkezes', '/admin', '/login', '/register'].includes(location.pathname)) return null;
+  if (['/jelentkezes', '/soulmind-control-2025', '/soulmind-login-2025', '/soulmind-register-2025', '/araink'].includes(location.pathname)) return null;
 
   // Ha nem látható, akkor ne rendereljen semmit
   if (!visible) return null;
