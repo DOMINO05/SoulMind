@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -6,21 +6,20 @@ on:
   pull_request:
     branches: [ main, master ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+permissions:
+  contents: write
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
     
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 20.x
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 20.x
         cache: 'npm'
         
     - name: Install dependencies
@@ -35,7 +34,14 @@ jobs:
     - name: Build
       run: npm run build
       env:
-        # These are usually needed for the build if it bakes env vars
-        # For a real deploy, these should be secrets. For CI build, dummies often work if validation allows.
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://example.supabase.co' }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'dummy-key' }}
+        # For CI build, dummies work because env vars are baked at build time.
+        # But for the app to work, these secrets MUST be set in GitHub Repo Settings > Secrets
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: dist # The folder the action should deploy.
+        branch: gh-pages # The branch the action should deploy to.

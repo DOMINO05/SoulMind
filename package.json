@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://DOMINO05.github.io/SoulMind",
+  "homepage": "https://www.soulmindacademy.eu",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
