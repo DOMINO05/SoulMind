@@ -10,6 +10,8 @@ import Admin from './pages/Admin';
 import Volumes from './pages/Volumes';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Impresszum from './pages/Impresszum';
+import Adatvedelem from './pages/Adatvedelem';
 import ScrollToTop from './components/ScrollToTop';
 import FloatingCTA from './components/FloatingCTA';
 import { AuthProvider } from './context/AuthContext';
@@ -33,6 +35,8 @@ function App() {
               <Route path="/jelentkezes" element={<Application />} />
               <Route path="/soulmind-login-2025" element={<Login />} />
               <Route path="/soulmind-register-2025" element={<Register />} />
+              <Route path="/impresszum" element={<Impresszum />} />
+              <Route path="/adatvedelem" element={<Adatvedelem />} />
               <Route 
                 path="/soulmind-control-2025" 
                 element={
