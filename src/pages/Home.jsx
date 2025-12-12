@@ -7,7 +7,6 @@ const Home = () => {
   const heroImage = "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop";
   
   const [sections, setSections] = useState([]);
-  const [sectionItems, setSectionItems] = useState([]);
   const [trainings, setTrainings] = useState([]);
   const [lightboxImg, setLightboxImg] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +20,6 @@ const Home = () => {
           supabase.from('trainings').select('*')
         ]);
         if (secRes.data) setSections(secRes.data);
-        // if (itemRes.data) setSectionItems(itemRes.data);
         if (trainRes.data) setTrainings(trainRes.data);
       } catch (error) {
         console.error("Hiba:", error);
@@ -46,7 +44,7 @@ const Home = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
+    } catch {
       window.open(url, '_blank');
     }
   };
