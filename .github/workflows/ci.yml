@@ -2,9 +2,9 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, stilus ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, stilus ]
 
 permissions:
   contents: write
@@ -40,7 +40,7 @@ jobs:
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
     - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/stilus')
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: dist # The folder the action should deploy.
