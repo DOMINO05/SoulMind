@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Book } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Volumes = () => {
   const [volumes, setVolumes] = useState([]);
@@ -35,9 +36,14 @@ const Volumes = () => {
 
   return (
     <div className="min-h-screen bg-light pt-24 pb-12 animate-fade-in">
+      <SEO 
+        title="Szakirodalom & Kötetek"
+        description="Ajánlott olvasmányok, saját kiadványok és szakirodalom a tudatos vezetés és önismeret témakörében."
+        keywords="pszichológiai szakkönyvek, önismereti könyvek, vezetői szakirodalom, ajánlott irodalom"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16 mt-10">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-dark mb-4">Kötetek</h1>
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-dark mb-4">Kötetek és Szakirodalom</h1>
           <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
           <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto font-light">
             A témákhoz kapcsolódó szakirodalom és kiadványok gyűjteménye.

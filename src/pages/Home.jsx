@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { ArrowRight, X, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const Home = () => {
   const heroImage = "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop";
@@ -53,15 +54,45 @@ const Home = () => {
 
   const heroContainerClass = "relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in-up pt-24";
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "SoulMind Academy",
+    "url": "https://www.soulmindacademy.eu",
+    "logo": "https://www.soulmindacademy.eu/logo.svg",
+    "description": "Vezetői tréningek, önismereti csoportok és pszichológiai tanácsadás vezetőknek.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Debrecen",
+      "addressCountry": "HU"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "areaServed": "HU",
+      "availableLanguage": ["Hungarian"]
+    },
+    "sameAs": [] // Add social media links if available
+  };
+
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500">
+      <SEO 
+        title="Tudatos Vezetés & Önismeret"
+        description="SoulMind Academy: Vezetői tréning, önismereti csoportok és munkahelyi stresszkezelés. Fejlessze vezetői kompetenciáit és előzze meg a kiégést."
+        keywords="vezetői tréning, önismeret, burnout kezelés, asszertív kommunikáció, Debrecen, pszichológus vezetőknek"
+        schema={schema}
+      />
       
       {/* HERO SECTION */}
       <header className="relative min-h-[95vh] overflow-hidden flex items-center justify-center py-20">
          <div className="absolute inset-0 z-0">
            <img 
              src={heroImage} 
-             alt="Background" 
+             alt="Tudatos Vezetés és Önismeret Háttér" 
+             fetchPriority="high"
+             width="2032"
+             height="1355"
              className="w-full h-full object-cover transition-transform duration-[20s] hover:scale-110"
            />
            <div className="absolute inset-0 bg-black/80" />

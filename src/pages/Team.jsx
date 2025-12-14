@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Team = () => {
   const [team, setTeam] = useState([]);
@@ -30,8 +31,13 @@ const Team = () => {
 
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500 pt-24 pb-16">
+      <SEO 
+        title="Munkatársak | Pszichológusok és Trénerek"
+        description="Ismerje meg a SoulMind Academy szakértő csapatát. Tapasztalt pszichológusok, coachok és trénerek, akik támogatják a vezetői fejlődésben."
+        keywords="pszichológus vezetőknek, tréner csapat, business coachok, szakértői gárda"
+      />
       <div className="max-w-7xl mx-auto px-4 mb-16 text-center mt-10">
-        <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">Munkatársak</h1>
+        <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">Munkatársaink: Szakértő Pszichológusok és Trénerek</h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Ismerje meg szakértő csapatunkat, akik elkötelezettek a fejlődés támogatásában.
         </p>

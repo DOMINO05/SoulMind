@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { applicationSchema } from '../lib/schemas';
+import SEO from '../components/SEO';
 
 const Application = () => {
   const [formData, setFormData] = useState({
@@ -44,10 +45,15 @@ const Application = () => {
 
   return (
     <div className="min-h-screen pt-24 bg-light flex items-center justify-center px-4 py-12 animate-fade-in">
+      <SEO 
+        title="Jelentkezés | Konzultáció és Tréning"
+        description="Jelentkezzen ingyenes konzultációra vagy vezetői tréningjeinkre. Lépjen kapcsolatba velünk és kezdje el a fejlődést még ma!"
+        keywords="tréning jelentkezés, konzultáció kérése, kapcsolatfelvétel, időpontfoglalás"
+      />
       {/* Container with fade-in-up animation */}
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden mt-5 border border-gray-100 animate-fade-in-up">
         <div className="bg-primary p-8 text-center">
-          <h2 className="text-3xl font-serif font-bold text-white">Jelentkezés</h2>
+          <h2 className="text-3xl font-serif font-bold text-white">Jelentkezés és Kapcsolatfelvétel</h2>
           <p className="text-white/90 mt-2 font-light">Csatlakozz a következő vezetői tréninghez!</p>
         </div>
         

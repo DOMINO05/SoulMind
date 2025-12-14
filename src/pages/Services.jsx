@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Leaf, Heart, Sun, ChevronDown, ChevronUp } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Services = () => {
   const [sections, setSections] = useState([]);
@@ -50,8 +51,13 @@ const Services = () => {
 
   return (
     <div className="bg-light min-h-screen animate-fade-in transition-colors duration-500 pt-24">
+      <SEO 
+        title="Vezetői Tréningek & Szolgáltatások"
+        description="Asszertív kommunikáció, stresszkezelés, vezetői coaching és szervezetfejlesztés. Professzionális megoldások vezetőknek és cégeknek."
+        keywords="asszertív kommunikáció tréning, stresszkezelés tréning, vezetői coaching, szervezetfejlesztés, pszichológiai tanácsadás"
+      />
       <div className="max-w-7xl mx-auto px-4 mb-16 mt-10 text-center">
-        <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">Szolgáltatásaink</h1>
+        <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">Szolgáltatásaink: Vezetői Tréning és Tanácsadás</h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Fedezd fel kínálatunkat, melyek célja a tudatos fejlődés és a mentális jólét támogatása.
         </p>
