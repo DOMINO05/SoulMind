@@ -180,12 +180,20 @@ const Home = () => {
               alt={lightboxImg.alt} 
               className="max-h-[70vh] md:max-h-[80vh] rounded shadow-2xl object-contain bg-white animate-fade-in-up" 
             />
-            <button 
-              onClick={() => downloadImage(lightboxImg.src, lightboxImg.alt)}
-              className="bg-white text-dark px-8 py-3 rounded-full flex items-center gap-2 text-base font-bold hover:bg-primary hover:text-white transition-all duration-300 shadow-lg"
-            >
-              <Download size={20} /> Kép Letöltése
-            </button>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link
+                to="/jelentkezes"
+                className="bg-primary text-white px-8 py-3 rounded-full flex items-center gap-2 text-base font-bold hover:bg-white hover:text-primary transition-all duration-300 shadow-lg border border-primary"
+              >
+                Jelentkezem <ArrowRight size={20} />
+              </Link>
+              <button 
+                onClick={() => downloadImage(lightboxImg.src, lightboxImg.alt)}
+                className="bg-white text-dark px-8 py-3 rounded-full flex items-center gap-2 text-base font-bold hover:bg-primary hover:text-white transition-all duration-300 shadow-lg"
+              >
+                <Download size={20} /> Kép Letöltése
+              </button>
+            </div>
           </div>
         </div>
       )}

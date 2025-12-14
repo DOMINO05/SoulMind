@@ -43,6 +43,29 @@ A fejlesztés során a **Security-by-Design** elvet követtük. A rendszer több
 
 ---
 
+## Prémium SEO és Kibervédelmi Pajzs
+
+A rendszer alapjaiból integrálva tartalmazza a legfejlettebb keresőoptimalizálási és automatizált támadások elleni védelmi megoldásokat. Ez nem csak egy weboldal, hanem egy **üzleti növekedést támogató, páncélozott digitális eszköz**.
+
+### 1. Intelligens Űrlapvédelem (Smart Form Defense)
+A jelentkezési felületet egy **háromszintű védelmi gyűrűvel** láttuk el, amely láthatatlan a valódi felhasználók számára, de áthatolhatatlan a spambotoknak:
+
+*   **Honeypot Csapda:** Egy rejtett mező, amely "mézesmadzagként" vonzza a botokat. Ha egy automata kitölti, a rendszer azonnal, némán elutasítja a kérést, miközben a támadó azt hiszi, sikerrel járt.
+*   **Viselkedésalapú Elemzés (Time-Lock):** A rendszer méri a kitöltési sebességet. Ha valaki (vagy valami) "emberfeletti" sebességgel (2 másodperc alatt) küldi be az űrlapot, azt azonnal blokkoljuk.
+*   **Flood Control (Rate Limiting):** Megakadályozza az űrlap "elárasztását" azzal, hogy egy felhasználótól csak 30 másodpercenként fogad el új kérést. Ezzel védjük az adatbázist a túlterheléstől és a rosszindulatú támadásoktól.
+
+### 2. Keresőmotor Dominancia (Advanced SEO Engine)
+A platform technikai SEO megoldásai garantálják, hogy a Google nemcsak "látja", hanem **érti és előnyben részesíti** az oldalt:
+
+*   **Dinamikus Meta-Menedzsment:** Minden egyes aloldal (`/szolgaltatasok`, `/munkatarsak`) egyedi, kulcsszó-optimalizált metaadatokkal rendelkezik, amit a `react-helmet-async` vezérel. Ez drasztikusan növeli a kattintási arányt (CTR) a keresőkből.
+*   **Strukturált Adatok (Schema.org):** Beépítettük a "digitális névjegykártyát" (JSON-LD), így a Google pontosan tudja, hogy ez egy debreceni székhelyű szervezet, ami javítja a helyi találati listás helyezést (Local SEO).
+*   **Core Web Vitals Optimalizálás:**
+    *   **LCP (Largest Contentful Paint):** A főoldali képek prioritizált betöltése (`fetchpriority="high"`) biztosítja, hogy a felhasználó azonnal lássa a tartalmat.
+    *   **CLS (Layout Shift) Védelem:** A képek fix méretezése megakadályozza az oldal "ugrálását" betöltés közben, ami kritikus rangsorolási tényező a Google-nél.
+*   **Teljes Indexelhetőség:** Automatikusan generált `sitemap.xml` és konfigurált `robots.txt` irányítja a keresőrobotokat a fontos tartalmak felé.
+
+---
+
 ## DevOps és CI/CD Folyamatok
 
 A fejlesztési ciklus teljesen automatizált, biztosítva a gyors és hibamentes publikálást.

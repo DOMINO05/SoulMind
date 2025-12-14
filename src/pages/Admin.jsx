@@ -349,9 +349,9 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pt-24 pb-12 px-2 md:px-4 animate-fade-in">
-      <div className="max-w-7xl mt-5 mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col">
+      <div className="max-w-7xl mt-5 mx-auto bg-white rounded-[12px] shadow-sm border border-gray-200 min-h-[600px] flex flex-col overflow-hidden">
         
-        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 rounded-t-[12px] flex-wrap items-center">
+        <div className="flex w-full border-b border-gray-200 px-1 md:px-6 pt-4 gap-1 bg-gray-50/50 flex-wrap items-center">
           <TabButton id="sections" label="Tartalom" icon={FileText} />
           <TabButton id="prices" label="Áraink" icon={DollarSign} />
           <TabButton id="volumes" label="Kötetek" icon={Book} />
@@ -379,9 +379,9 @@ const Admin = () => {
             <div className="grid gap-8">
               
               {/* Create New Section */}
-              <div className="bg-blue-50 p-6 rounded-[8px] border border-blue-100 mb-4">
+              <div className="bg-blue-50 p-4 md:p-6 rounded-[8px] border border-blue-100 mb-4">
                 <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új Szekció Létrehozása</h4>
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <input 
                     type="text" 
                     placeholder="Szekció neve" 
@@ -391,7 +391,7 @@ const Admin = () => {
                   />
                   <button 
                     onClick={addSection}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center gap-2"
+                    className="bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2"
                   >
                     Létrehozás
                   </button>

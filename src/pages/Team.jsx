@@ -37,7 +37,10 @@ const Team = () => {
         keywords="pszichológus vezetőknek, tréner csapat, business coachok, szakértői gárda"
       />
       <div className="max-w-7xl mx-auto px-4 mb-16 text-center mt-10">
-        <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">Munkatársaink: Szakértő Pszichológusok és Trénerek</h1>
+        <h1 className="text-3xl md:text-5xl font-serif font-bold text-dark mb-6">
+          <span className="block mb-2">Munkatársaink:</span>
+          <span className="block">Szakértő Pszichológusok és Trénerek</span>
+        </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Ismerje meg szakértő csapatunkat, akik elkötelezettek a fejlődés támogatásában.
         </p>

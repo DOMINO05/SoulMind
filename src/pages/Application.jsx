@@ -1,21 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { applicationSchema } from '../lib/schemas';
 import SEO from '../components/SEO';
 
 const Application = () => {
   const [formData, setFormData] = useState({
-    full_name: '', phone: '', email: '', interests: '', gdpr: false
+    full_name: '', phone: '', email: '', interests: '', gdpr: false, website: '' // Honeypot
   });
   const [status, setStatus] = useState('idle');
   const [errors, setErrors] = useState({});
+  const [startTime, setStartTime] = useState(0);
+
+  useEffect(() => {
+    setStartTime(Date.now());
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
+
+    // 1. Honeypot check
+    if (formData.website) {
+      console.log("Bot detected (honeypot)");
+      setStatus('success'); // Fake success
+      return;
+    }
+
+    // 2. Minimum submission time check (2 seconds)
+    if (Date.now() - startTime < 2000) {
+       console.log("Bot detected (too fast)");
+       return;
+    }
+
+    // 3. Rate limiting check (30 seconds)
+    const lastSubmission = localStorage.getItem('lastSubmission');
+    if (lastSubmission && Date.now() - parseInt(lastSubmission) < 30000) {
+      alert("Kérjük várjon egy fél percet az újabb beküldés előtt!");
+      return;
+    }
     
     // Validation
-    const validation = applicationSchema.safeParse(formData);
+    const validation = applicationSchema.safeParse({
+        full_name: formData.full_name, 
+        phone: formData.phone, 
+        email: formData.email, 
+        interests: formData.interests, 
+        gdpr: formData.gdpr
+    });
+
     if (!validation.success) {
       const fieldErrors = {};
       validation.error.errors.forEach(err => {
@@ -38,8 +70,9 @@ const Application = () => {
       console.error(error);
       setStatus('error');
     } else {
+      localStorage.setItem('lastSubmission', Date.now().toString());
       setStatus('success');
-      setFormData({ full_name: '', phone: '', email: '', interests: '', gdpr: false });
+      setFormData({ full_name: '', phone: '', email: '', interests: '', gdpr: false, website: '' });
     }
   };
 
@@ -67,6 +100,17 @@ const Application = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Honeypot field - Hidden */}
+              <input 
+                type="text" 
+                name="website" 
+                style={{ display: 'none' }} 
+                tabIndex="-1" 
+                autoComplete="off"
+                value={formData.website}
+                onChange={e => setFormData({...formData, website: e.target.value})}
+              />
+
               {['full_name', 'email', 'phone'].map((field) => (
                 <div key={field}>
                   <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">
