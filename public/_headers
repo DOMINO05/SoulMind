@@ -2,3 +2,7 @@
   Content-Type: application/xml
 /robots.txt
   Content-Type: text/plain
+/sitemap_source.xml
+  Content-Type: application/xml
+/robots_source.txt
+  Content-Type: text/plain
