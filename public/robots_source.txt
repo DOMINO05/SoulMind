@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /soulmind-control-2025
+Disallow: /soulmind-login-2025
+Disallow: /soulmind-register-2025
+
+Sitemap: https://www.soulmindacademy.eu/sitemap.xml

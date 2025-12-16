@@ -45,7 +45,7 @@ A fejlesztés során a **Security-by-Design** elvet követtük. A rendszer több
 
 ## Prémium SEO és Kibervédelmi Pajzs
 
-A rendszer alapjaiból integrálva tartalmazza a legfejlettebb keresőoptimalizálási és automatizált támadások elleni védelmi megoldásokat. Ez nem csak egy weboldal, hanem egy **üzleti növekedést támogató, páncélozott digitális eszköz**.
+A rendszer tartalmazza a legfejlettebb keresőoptimalizálási és automatizált támadások elleni védelmi megoldásokat. 
 
 ### 1. Intelligens Űrlapvédelem (Smart Form Defense)
 A jelentkezési felületet egy **háromszintű védelmi gyűrűvel** láttuk el, amely láthatatlan a valódi felhasználók számára, de áthatolhatatlan a spambotoknak:
