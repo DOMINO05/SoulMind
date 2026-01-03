@@ -328,6 +328,18 @@ const Admin = () => {
     }
   };
 
+  const sortedSections = [...data.sections].sort((a, b) => {
+    const priority = ['Főoldal Kérdések', 'Főoldal CTA'];
+    const indexA = priority.indexOf(a.name);
+    const indexB = priority.indexOf(b.name);
+    
+    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    
+    return a.id - b.id;
+  });
+
   const TabButton = ({ id, label, icon: Icon }) => (
     <button 
       onClick={() => setActiveTab(id)}
@@ -398,7 +410,7 @@ const Admin = () => {
                 </div>
               </div>
 
-              {data.sections.filter(s => s.name !== 'Tréningek' && s.name !== 'A témákhoz kapcsolódó kötetek').map(sec => (
+              {sortedSections.filter(s => s.name !== 'Tréningek' && s.name !== 'A témákhoz kapcsolódó kötetek').map(sec => (
                 <div key={sec.id} className="bg-gray-50 p-4 md:p-6 rounded-[8px] border border-gray-200 transition-all hover:shadow-md">
                   
                   <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
@@ -439,12 +451,14 @@ const Admin = () => {
                               placeholder="Fő szöveg"
                               autoFocus
                             />
-                            <textarea 
-                              value={editDetails}
-                              onChange={(e) => setEditDetails(e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-[4px] outline-none focus:ring-2 focus:ring-primary/50 text-sm min-h-[80px]"
-                              placeholder="Részletes leírás (lenyíló menü)..."
-                            />
+                            {!['Főoldal Kérdések', 'Főoldal CTA'].includes(sec.name) && (
+                              <textarea 
+                                value={editDetails}
+                                onChange={(e) => setEditDetails(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-[4px] outline-none focus:ring-2 focus:ring-primary/50 text-sm min-h-[80px]"
+                                placeholder="Részletes leírás (lenyíló menü)..."
+                              />
+                            )}
                             <div className="flex gap-2 w-full justify-end">
                               <button onClick={() => updateItem(item.id)} className="bg-green-50 text-green-600 p-2 rounded-[4px] hover:bg-green-100 flex items-center gap-1"><Check size={18} /> Mentés</button>
                               <button onClick={cancelEditing} className="bg-gray-50 text-gray-500 p-2 rounded-[4px] hover:bg-gray-100 flex items-center gap-1"><X size={18} /> Mégse</button>
