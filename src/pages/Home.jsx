@@ -8,6 +8,7 @@ const Home = () => {
   const heroImage = "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop";
   
   const [sections, setSections] = useState([]);
+  const [sectionItems, setSectionItems] = useState([]);
   const [trainings, setTrainings] = useState([]);
   const [lightboxImg, setLightboxImg] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,12 +16,13 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [secRes, , trainRes] = await Promise.all([
+        const [secRes, itemRes, trainRes] = await Promise.all([
           supabase.from('sections').select('*').order('id'),
-          supabase.from('section_items').select('*'),
+          supabase.from('section_items').select('*').order('id'),
           supabase.from('trainings').select('*')
         ]);
         if (secRes.data) setSections(secRes.data);
+        if (itemRes.data) setSectionItems(itemRes.data);
         if (trainRes.data) setTrainings(trainRes.data);
       } catch (error) {
         console.error("Hiba:", error);
@@ -31,7 +33,10 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // const getItems = (secId) => sectionItems.filter(i => i.section_id === secId);
+  const getSectionContent = (name) => {
+    const sec = sections.find(s => s.name === name);
+    return sec ? sectionItems.filter(i => i.section_id === sec.id) : [];
+  };
 
   const downloadImage = async (url, filename) => {
     try {
@@ -106,15 +111,23 @@ const Home = () => {
             </h1>
             
             <div className="text-base md:text-lg mb-8 font-light leading-relaxed drop-shadow-md text-gray-100 text-left md:text-center space-y-2 max-w-3xl mx-auto mt-10">
-              <p>Gyakran előfordul, hogy nehezen boldogulsz a kommunikációs helyzetekben?</p>
-              <p>Vezetői ambícióid vannak és szeretnéd biztonságos közegben kipróbálni magad?</p>
-              <p>Kezdő vezető vagy és elveszettnek érzed magad?</p>
-              <p>Unod már, hogy mindent egyedül kell elvégezned?</p>
+              {(getSectionContent('Főoldal Kérdések').length > 0 
+                ? getSectionContent('Főoldal Kérdések') 
+                : [
+                    { id: 1, content: "Gyakran előfordul, hogy nehezen boldogulsz a kommunikációs helyzetekben?\nVezetői ambícióid vannak és szeretnéd biztonságos közegben kipróbálni magad?\nKezdő vezető vagy és elveszettnek érzed magad?\nUnod már, hogy mindent egyedül kell elvégezned?" }
+                  ]
+              ).map(item => (
+                item.content.split('\n').map((line, idx) => (
+                  <p key={`${item.id}-${idx}`}>{line}</p>
+                ))
+              ))}
             </div>
             
             <div className="mb-8">
                <p className="text-white font-medium text-lg md:text-xl mb-6 max-w-2xl mx-auto">
-                 Ha igennel válaszoltál valamelyik kérdésre és szeretnél hatékonyabban működni ezeken a területeken, akkor jelentkezz ingyenes konzultációnkra!
+                 {getSectionContent('Főoldal CTA').length > 0 
+                   ? getSectionContent('Főoldal CTA')[0].content 
+                   : "Ha igennel válaszoltál valamelyik kérdésre és szeretnél hatékonyabban működni ezeken a területeken, akkor jelentkezz ingyenes konzultációnkra!"}
                </p>
             </div>
 

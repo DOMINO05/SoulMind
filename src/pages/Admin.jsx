@@ -432,11 +432,10 @@ const Admin = () => {
                       <li key={item.id} className="bg-white p-3 rounded-[6px] border border-gray-100 shadow-sm">
                         {editingId === item.id ? (
                           <div className="flex flex-col gap-2 w-full animate-fade-in">
-                            <input 
-                              type="text" 
+                            <textarea 
                               value={editValue}
                               onChange={(e) => setEditValue(e.target.value)}
-                              className="w-full px-3 py-2 border border-primary rounded-[4px] outline-none focus:ring-2 focus:ring-primary/50 text-dark"
+                              className="w-full px-3 py-2 border border-primary rounded-[4px] outline-none focus:ring-2 focus:ring-primary/50 text-dark min-h-[100px]"
                               placeholder="Fő szöveg"
                               autoFocus
                             />
@@ -454,7 +453,7 @@ const Admin = () => {
                         ) : (
                           <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-2 md:gap-4">
                             <div className="flex-1">
-                              <span className="text-gray-700 font-medium">{item.content}</span>
+                              <span className="text-gray-700 font-medium whitespace-pre-wrap">{item.content}</span>
                               {item.details && (
                                 <p className="text-gray-400 text-sm mt-1 truncate">{item.details.substring(0, 50)}...</p>
                               )}
