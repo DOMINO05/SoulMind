@@ -353,12 +353,11 @@ const Admin = () => {
 
   const filteredSections = data.sections.filter(s => {
     const isHomeSection = ['Főoldal Kérdések', 'Főoldal'].includes(s.name);
-    const isExcluded = ['Tréningek', 'A témákhoz kapcsolódó kötetek'].includes(s.name);
     
     if (contentSubTab === 'home') {
       return isHomeSection;
     } else {
-      return !isHomeSection && !isExcluded;
+      return !isHomeSection;
     }
   });
 

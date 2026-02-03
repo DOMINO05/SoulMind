@@ -38,10 +38,8 @@ const Services = () => {
 
   const getItems = (secId) => sectionItems.filter(i => i.section_id === secId);
 
-  // Sections to exclude (Tréningek is on Home, Kötetek is on Volumes/Home, Főoldal is on Home)
+  // Sections to exclude (Főoldal elements are handled on Home page)
   const excludedSections = [
-    'Tréningek',
-    'A témákhoz kapcsolódó kötetek',
     'Főoldal',
     'Főoldal Kérdések'
   ];

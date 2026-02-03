@@ -142,40 +142,34 @@ const Home = () => {
       </header>
 
       <main>
-        {sections
-          .filter(section => section.name === 'Tréningek')
-          .map((section) => {
-            return (
-              <section key={section.id} className="py-24 bg-white px-4">
-                <div className="max-w-7xl mx-auto">
-                  <div className="text-center mb-16">
-                    <h2 className="text-4xl font-serif font-bold text-dark mb-4">{section.name}</h2>
-                    <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
-                  </div>
+        <section className="py-24 bg-white px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-serif font-bold text-dark mb-4">Tréningek</h2>
+              <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
+            </div>
                   
-                  {trainings.length === 0 ? (
-                    <p className="text-center text-gray-500">Jelenleg nincs elérhető tréning.</p>
-                  ) : (
-                    <div className="flex flex-wrap justify-center gap-8">
-                      {trainings.map(train => (
-                        <div 
-                          key={train.id} 
-                          className="relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33%-2rem)] max-w-md aspect-[4/5] rounded-2xl"
-                          onClick={() => setLightboxImg({ src: train.image_path, alt: train.alt_text })}
-                        >
-                          <img 
-                            src={train.image_path} 
-                            alt={train.alt_text} 
-                            className="w-full h-full object-contain p-2" 
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </section>
-            );
-        })}
+            {trainings.length === 0 ? (
+              <p className="text-center text-gray-500">Jelenleg nincs elérhető tréning.</p>
+            ) : (
+              <div className="flex flex-wrap justify-center gap-8">
+                {trainings.map(train => (
+                  <div 
+                    key={train.id} 
+                    className="relative cursor-pointer overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gray-50 w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33%-2rem)] max-w-md aspect-[4/5] rounded-2xl"
+                    onClick={() => setLightboxImg({ src: train.image_path, alt: train.alt_text })}
+                  >
+                    <img 
+                      src={train.image_path} 
+                      alt={train.alt_text} 
+                      className="w-full h-full object-contain p-2" 
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
 
       {/* Lightbox */}
