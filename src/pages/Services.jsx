@@ -22,7 +22,7 @@ const Services = () => {
     const fetchData = async () => {
       try {
         const [secRes, itemRes] = await Promise.all([
-          supabase.from('sections').select('*').order('id', { ascending: true }),
+          supabase.from('sections').select('*').order('sort_order', { ascending: true }),
           supabase.from('section_items').select('*').order('id', { ascending: true })
         ]);
         if (secRes.data) setSections(secRes.data);
@@ -38,10 +38,12 @@ const Services = () => {
 
   const getItems = (secId) => sectionItems.filter(i => i.section_id === secId);
 
-  // Sections to exclude (Tréningek is on Home, Kötetek is on Volumes/Home)
+  // Sections to exclude (Tréningek is on Home, Kötetek is on Volumes/Home, Főoldal is on Home)
   const excludedSections = [
     'Tréningek',
-    'A témákhoz kapcsolódó kötetek'
+    'A témákhoz kapcsolódó kötetek',
+    'Főoldal',
+    'Főoldal Kérdések'
   ];
 
 

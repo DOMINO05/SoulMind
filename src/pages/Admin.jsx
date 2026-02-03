@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('responses');
+  const [contentSubTab, setContentSubTab] = useState('services'); // 'services' or 'home'
   const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [] });
   const [refresh, setRefresh] = useState(0);
   
@@ -43,7 +44,7 @@ const Admin = () => {
   useEffect(() => {
     const load = async () => {
       const [s, i, t, r, v, tm, p] = await Promise.all([
-        supabase.from('sections').select('*').order('id', { ascending: true }),
+        supabase.from('sections').select('*').order('sort_order', { ascending: true }),
         supabase.from('section_items').select('*').order('id', { ascending: true }),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
         supabase.from('questionnaire').select('*').order('created_at', { ascending: false }),
@@ -328,16 +329,37 @@ const Admin = () => {
     }
   };
 
-  const sortedSections = [...data.sections].sort((a, b) => {
-    const priority = ['Főoldal Kérdések', 'Főoldal CTA'];
-    const indexA = priority.indexOf(a.name);
-    const indexB = priority.indexOf(b.name);
+  const moveSection = async (sectionId, direction) => {
+    const sectionIndex = data.sections.findIndex(s => s.id === sectionId);
+    if (direction === 'up' && sectionIndex === 0) return;
+    if (direction === 'down' && sectionIndex === data.sections.length - 1) return;
+
+    const otherIndex = direction === 'up' ? sectionIndex - 1 : sectionIndex + 1;
+    const currentSection = data.sections[sectionIndex];
+    const otherSection = data.sections[otherIndex];
+
+    const { error } = await supabase.from('sections').upsert([
+      { ...currentSection, sort_order: otherSection.sort_order },
+      { ...otherSection, sort_order: currentSection.sort_order }
+    ]);
+
+    if (error) {
+      alert('Hiba a mozgatás során!');
+      console.error(error);
+    } else {
+      triggerRefresh();
+    }
+  };
+
+  const filteredSections = data.sections.filter(s => {
+    const isHomeSection = ['Főoldal Kérdések', 'Főoldal'].includes(s.name);
+    const isExcluded = ['Tréningek', 'A témákhoz kapcsolódó kötetek'].includes(s.name);
     
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
-    
-    return a.id - b.id;
+    if (contentSubTab === 'home') {
+      return isHomeSection;
+    } else {
+      return !isHomeSection && !isExcluded;
+    }
   });
 
   const TabButton = ({ id, label, icon: Icon }) => (
@@ -388,33 +410,51 @@ const Admin = () => {
           
           {/* CONTENT EDITOR */}
           {activeTab === 'sections' && (
-            <div className="grid gap-8">
+            <div className="grid gap-6">
               
-              {/* Create New Section */}
-              <div className="bg-blue-50 p-4 md:p-6 rounded-[8px] border border-blue-100 mb-4">
-                <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új Szekció Létrehozása</h4>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input 
-                    type="text" 
-                    placeholder="Szekció neve" 
-                    value={newSectionName}
-                    onChange={(e) => setNewSectionName(e.target.value)}
-                    className="flex-1 border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                  <button 
-                    onClick={addSection}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2"
-                  >
-                    Létrehozás
-                  </button>
-                </div>
+              {/* Sub-tabs for Content */}
+              <div className="flex border-b border-gray-200 mb-2">
+                <button 
+                  onClick={() => setContentSubTab('services')}
+                  className={`px-6 py-2 font-medium transition-all ${contentSubTab === 'services' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Szolgáltatások oldal
+                </button>
+                <button 
+                  onClick={() => setContentSubTab('home')}
+                  className={`px-6 py-2 font-medium transition-all ${contentSubTab === 'home' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Főoldal
+                </button>
               </div>
 
-              {sortedSections.filter(s => s.name !== 'Tréningek' && s.name !== 'A témákhoz kapcsolódó kötetek').map(sec => (
+              {/* Create New Section - Only for services tab */}
+              {contentSubTab === 'services' && (
+                <div className="bg-blue-50 p-4 md:p-6 rounded-[8px] border border-blue-100 mb-4">
+                  <h4 className="font-bold text-blue-900 text-lg mb-4 flex items-center gap-2"><Plus size={20} /> Új Szekció Létrehozása</h4>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <input 
+                      type="text" 
+                      placeholder="Szekció neve" 
+                      value={newSectionName}
+                      onChange={(e) => setNewSectionName(e.target.value)}
+                      className="flex-1 border border-blue-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                    <button 
+                      onClick={addSection}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-[4px] hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2"
+                    >
+                      Létrehozás
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {filteredSections.map((sec, idx) => (
                 <div key={sec.id} className="bg-gray-50 p-4 md:p-6 rounded-[8px] border border-gray-200 transition-all hover:shadow-md">
                   
                   <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
-                    {editingSectionId === sec.id ? (
+                    {editingSectionId === sec.id && contentSubTab === 'services' ? (
                       <div className="flex gap-2 w-full items-center">
                         <input 
                           value={editSectionName}
@@ -425,13 +465,33 @@ const Admin = () => {
                         <button onClick={() => setEditingSectionId(null)} className="text-gray-500 hover:bg-gray-100 p-2 rounded-[4px]"><X size={20}/></button>
                       </div>
                     ) : (
-                      <h3 className="text-xl font-bold text-dark flex items-center gap-2">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                        {sec.name}
-                      </h3>
+                      <div className="flex items-center gap-3">
+                        {contentSubTab === 'services' && (
+                          <div className="flex flex-col gap-1 mr-2">
+                            <button 
+                              onClick={() => moveSection(sec.id, 'up')}
+                              disabled={idx === 0}
+                              className={`p-1 rounded hover:bg-gray-200 transition ${idx === 0 ? 'text-gray-300' : 'text-gray-500'}`}
+                            >
+                              <ArrowUp size={16} />
+                            </button>
+                            <button 
+                              onClick={() => moveSection(sec.id, 'down')}
+                              disabled={idx === filteredSections.length - 1}
+                              className={`p-1 rounded hover:bg-gray-200 transition ${idx === filteredSections.length - 1 ? 'text-gray-300' : 'text-gray-500'}`}
+                            >
+                              <ArrowDown size={16} />
+                            </button>
+                          </div>
+                        )}
+                        <h3 className="text-xl font-bold text-dark flex items-center gap-2">
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
+                          {sec.name}
+                        </h3>
+                      </div>
                     )}
                     
-                    {editingSectionId !== sec.id && (
+                    {editingSectionId !== sec.id && contentSubTab === 'services' && (
                       <div className="flex gap-2">
                          <button onClick={() => startEditingSection(sec)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-[4px] transition" title="Szekció átnevezése"><Edit2 size={18}/></button>
                          <button onClick={() => deleteSection(sec.id)} className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-[4px] transition" title="Szekció törlése"><Trash2 size={18}/></button>
