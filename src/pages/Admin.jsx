@@ -57,6 +57,7 @@ const Admin = () => {
   const [conflictModalOpen, setConflictModalOpen] = useState(false);
   const [conflictingBookings, setConflictingBookings] = useState([]);
   const [pendingBlockAction, setPendingBlockAction] = useState(null); // mit akartunk épp menteni
+  const [generalAlertMsg, setGeneralAlertMsg] = useState(null); // Általános hibaüzenet (alert kiváltója)
 
   useEffect(() => {
     const load = async () => {
@@ -102,7 +103,7 @@ const Admin = () => {
   const updateBookingStatus = async (id, newStatus, email, name) => {
     const { error } = await supabase.from('consultation_bookings').update({ status: newStatus }).eq('id', id);
     if (error) {
-      alert('Hiba a státusz frissítésekor!');
+      setGeneralAlertMsg('Hiba a státusz frissítésekor!');
     } else {
       triggerRefresh();
       
@@ -116,6 +117,10 @@ const Admin = () => {
   };
 
   const initiateBlock = async (isFullDay, startTimeStr = null, endTimeStr = null, reasonStr = '') => {
+    if (!selectedBlockDate) {
+      setGeneralAlertMsg("Kérlek először válassz ki egy napot!");
+      return;
+    }
     const dateStr = format(selectedBlockDate, 'yyyy-MM-dd');
     const activeBookings = data.bookings.filter(b => b.status === 'pending' || b.status === 'approved');
     
@@ -152,15 +157,17 @@ const Admin = () => {
   };
 
   const addBlock = async () => {
-    // Ez a régi gomb logikája (ha még használnánk, de lecseréljük)
-    if (!newBlock.date) return alert("A dátum megadása kötelező!");
+    if (!newBlock.date) {
+      setGeneralAlertMsg("A dátum megadása kötelező!");
+      return;
+    }
     await initiateBlock(newBlock.isFullDay, newBlock.startTime, newBlock.endTime, newBlock.reason);
   };
 
   const executeBlockInsert = async (blockData) => {
     const { error } = await supabase.from('blocked_times').insert(blockData);
     if (error) {
-      alert('Hiba a letiltás mentésekor');
+      setGeneralAlertMsg('Hiba a letiltás mentésekor');
     } else {
       setNewBlock({ date: format(selectedBlockDate, 'yyyy-MM-dd'), startTime: '', endTime: '', isFullDay: true, reason: '' });
       triggerRefresh();
@@ -252,15 +259,14 @@ const Admin = () => {
     setNewItem(''); setTargetSec(null); triggerRefresh();
   };
 
+  // Általános törlés, alert helyett logolás a konzolra ha hiba van, a siker esetén csak frissít (pl. a "Kuka" ikonokhoz is)
   const deleteItem = async (table, id) => {
-    if(confirm('Biztosan törlöd?')) {
-      const { error } = await supabase.from(table).delete().eq('id', id);
-      if (error) {
-        console.error("Delete error:", error);
-        alert("Hiba történt a törléskor.");
-      } else {
-        triggerRefresh();
-      }
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) {
+      console.error("Delete error:", error);
+      setGeneralAlertMsg("Hiba történt a törléskor.");
+    } else {
+      triggerRefresh();
     }
   };
 
@@ -274,7 +280,7 @@ const Admin = () => {
     if (!editValue.trim()) return;
     const { error } = await supabase.from('section_items').update({ content: editValue, details: editDetails }).eq('id', id);
     if (error) {
-      alert('Hiba a mentés során!');
+      setGeneralAlertMsg('Hiba a mentés során!');
     } else {
       setEditingId(null); setEditValue(''); setEditDetails(''); triggerRefresh();
     }
@@ -290,7 +296,7 @@ const Admin = () => {
     const { error } = await supabase.from('sections').insert({ name: newSectionName });
     if (error) {
       console.error(error);
-      alert('Hiba a létrehozáskor: ' + error.message);
+      setGeneralAlertMsg('Hiba a létrehozáskor: ' + error.message);
     } else {
       setNewSectionName('');
       triggerRefresh();
@@ -306,7 +312,7 @@ const Admin = () => {
     if (!editSectionName.trim()) return;
     const { error } = await supabase.from('sections').update({ name: editSectionName }).eq('id', id);
     if (error) {
-      alert('Hiba a frissítéskor');
+      setGeneralAlertMsg('Hiba a frissítéskor');
     } else {
       setEditingSectionId(null);
       setEditSectionName('');
@@ -339,7 +345,7 @@ const Admin = () => {
       triggerRefresh();
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Hiba történt a feltöltéskor.');
+      setGeneralAlertMsg('Hiba történt a feltöltéskor.');
     } finally {
       setUploading(false);
       e.target.value = null;
@@ -348,7 +354,10 @@ const Admin = () => {
 
   // --- PRICES CRUD ---
   const addPrice = async () => {
-    if (!newPrice.name.trim() || !newPrice.price.trim()) return alert("Minden mező kitöltése kötelező!");
+    if (!newPrice.name.trim() || !newPrice.price.trim()) {
+      setGeneralAlertMsg("Minden mező kitöltése kötelező!");
+      return;
+    }
     
     const { error } = await supabase.from('prices').insert({
       name: newPrice.name,
@@ -357,7 +366,7 @@ const Admin = () => {
 
     if (error) {
        console.error("Hiba:", error);
-       alert("Hiba történt mentéskor.");
+       setGeneralAlertMsg("Hiba történt mentéskor.");
     } else {
        setNewPrice({ name: '', price: '' });
        triggerRefresh();
@@ -381,7 +390,7 @@ const Admin = () => {
       triggerRefresh();
     } catch (error) {
        console.error("Update error:", error);
-       alert("Hiba történt frissítéskor.");
+       setGeneralAlertMsg("Hiba történt frissítéskor.");
     }
   };
 
@@ -397,7 +406,10 @@ const Admin = () => {
   };
 
   const addVolume = async () => {
-    if (!newVolume.title.trim()) return alert("A cím megadása kötelező!");
+    if (!newVolume.title.trim()) {
+      setGeneralAlertMsg("A cím megadása kötelező!");
+      return;
+    }
     
     setUploading(true);
     try {
@@ -419,7 +431,7 @@ const Admin = () => {
       triggerRefresh();
     } catch (error) {
       console.error("Hiba a kötet hozzáadásakor:", error);
-      alert("Hiba történt mentéskor.");
+      setGeneralAlertMsg("Hiba történt mentéskor.");
     } finally {
       setUploading(false);
     }
@@ -442,7 +454,7 @@ const Admin = () => {
       triggerRefresh();
     } catch (error) {
        console.error("Update error:", error);
-       alert("Hiba történt frissítéskor.");
+       setGeneralAlertMsg("Hiba történt frissítéskor.");
     }
   };
 
@@ -458,7 +470,10 @@ const Admin = () => {
   };
 
   const addMember = async () => {
-    if (!newMember.name.trim()) return alert("A név megadása kötelező!");
+    if (!newMember.name.trim()) {
+      setGeneralAlertMsg("A név megadása kötelező!");
+      return;
+    }
     
     setUploading(true);
     try {
@@ -480,7 +495,7 @@ const Admin = () => {
       triggerRefresh();
     } catch (error) {
       console.error("Hiba a munkatárs hozzáadásakor:", error);
-      alert("Hiba történt mentéskor.");
+      setGeneralAlertMsg("Hiba történt mentéskor.");
     } finally {
       setUploading(false);
     }
@@ -503,7 +518,7 @@ const Admin = () => {
       triggerRefresh();
     } catch (error) {
        console.error("Update error:", error);
-       alert("Hiba történt frissítéskor.");
+       setGeneralAlertMsg("Hiba történt frissítéskor.");
     }
   };
 
@@ -522,7 +537,7 @@ const Admin = () => {
     ]);
 
     if (error) {
-      alert('Hiba a mozgatás során!');
+      setGeneralAlertMsg('Hiba a mozgatás során!');
       console.error(error);
     } else {
       triggerRefresh();
@@ -1404,7 +1419,7 @@ const Admin = () => {
 
                         <div className="mt-2 text-gray-500 text-sm border-b pb-1 font-medium">Elérhető idősávok a beosztás szerint:</div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto max-h-[350px] pr-2">
+                        <div className="grid grid-cols-1 gap-2 overflow-y-auto max-h-[350px] pr-2">
                           {isFullDayBlocked ? (
                             <p className="col-span-full text-gray-400 italic text-sm text-center py-4">Mivel az egész nap le van tiltva, az idősávok nem kattinthatók.</p>
                           ) : (
@@ -1413,42 +1428,50 @@ const Admin = () => {
                               const nextHour = `${(hour + 1).toString().padStart(2, '0')}:00`;
                               const timeRange = `${timeStr} - ${nextHour}`;
                               
-                              // Megnézzük van-e foglalás
-                              const booking = dayBookings.find(b => format(new Date(b.booking_datetime), 'HH:mm') === timeStr);
+                              // Megnézzük van-e foglalás (itt most akár több is lehet ugyanarra az idősávra ha nem jól van kezelve az elérhetőség, de alapból 1)
+                              const bookingsInSlot = dayBookings.filter(b => format(new Date(b.booking_datetime), 'HH:mm') === timeStr);
                               
                               // Megnézzük le van-e tiltva külön
                               const block = dayBlocks.find(b => !b.is_full_day && b.start_time?.substring(0,5) === timeStr);
 
-                              if (booking) {
+                              // Ha van foglalás, zöldként jelenik meg
+                              if (bookingsInSlot.length > 0) {
                                 return (
-                                  <div key={timeStr} className="bg-green-100 border border-green-300 rounded p-3 flex flex-col justify-between cursor-pointer hover:bg-green-200 transition" onClick={() => {
-                                    if(confirm(`Szeretnéd letiltani ezt az időpontot, és ezáltal ELUTASÍTANI a foglalást (${booking.first_name} ${booking.last_name})?`)) {
-                                      initiateBlock(false, timeStr, nextHour, "Automatikus ütközés");
-                                    }
-                                  }}>
-                                    <span className="font-bold text-green-900">{timeRange}</span>
-                                    <span className="text-sm text-green-800 font-medium truncate">👤 {booking.first_name} {booking.last_name}</span>
+                                  <div key={timeStr} className="bg-green-100 border border-green-300 rounded p-4 flex flex-col md:flex-row md:items-center justify-between cursor-pointer hover:bg-green-200 transition shadow-sm" onClick={() => initiateBlock(false, timeStr, nextHour, "Automatikus ütközés")}>
+                                    <div>
+                                      <span className="font-bold text-green-900 text-lg mr-4">{timeRange}</span>
+                                      <div className="flex flex-col mt-1">
+                                        {bookingsInSlot.map((booking, idx) => (
+                                          <span key={idx} className="text-green-800 font-medium flex items-center gap-1">
+                                            <User size={14} /> {booking.first_name} {booking.last_name}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <button className="mt-3 md:mt-0 text-sm bg-white text-green-800 border border-green-300 px-3 py-1.5 rounded hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition shadow-sm self-start md:self-auto flex items-center gap-1 font-bold">
+                                      <Ban size={14} /> Letiltás
+                                    </button>
                                   </div>
                                 );
                               }
 
                               if (block) {
                                 return (
-                                  <div key={timeStr} className="bg-gray-100 border border-gray-300 rounded p-3 flex flex-col justify-center items-center cursor-pointer hover:bg-gray-200 transition relative overflow-hidden" onClick={() => deleteItem('blocked_times', block.id)}>
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 text-red-500">
-                                      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="4" /></svg>
+                                  <div key={timeStr} className="bg-gray-100 border border-gray-300 rounded p-4 flex flex-row items-center justify-between cursor-pointer hover:bg-gray-200 transition shadow-sm relative overflow-hidden" onClick={() => deleteItem('blocked_times', block.id)}>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 text-red-500">
+                                      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="6" /></svg>
                                     </div>
-                                    <span className="font-bold text-gray-500 line-through">{timeRange}</span>
-                                    <span className="text-xs text-red-500 font-bold mt-1 uppercase">Feloldás</span>
+                                    <span className="font-bold text-gray-500 text-lg line-through">{timeRange}</span>
+                                    <span className="text-sm bg-white text-red-600 border border-red-200 px-3 py-1.5 rounded font-bold shadow-sm flex items-center gap-1">Feloldás</span>
                                   </div>
                                 );
                               }
 
                               // Ha szabad
                               return (
-                                <div key={timeStr} className="bg-white border border-gray-300 rounded p-3 flex flex-col justify-center items-center cursor-pointer hover:border-red-500 hover:text-red-600 transition group" onClick={() => initiateBlock(false, timeStr, nextHour)}>
-                                  <span className="font-bold text-dark group-hover:text-red-600 transition">{timeRange}</span>
-                                  <span className="text-xs text-gray-400 group-hover:text-red-500 mt-1">Letiltás</span>
+                                <div key={timeStr} className="bg-white border border-gray-300 rounded p-4 flex flex-row items-center justify-between cursor-pointer hover:border-red-500 hover:bg-red-50 transition shadow-sm group" onClick={() => initiateBlock(false, timeStr, nextHour)}>
+                                  <span className="font-bold text-dark text-lg group-hover:text-red-700 transition">{timeRange}</span>
+                                  <span className="text-sm text-gray-500 group-hover:text-red-600 font-medium flex items-center gap-1 transition"><Ban size={14}/> Letiltás</span>
                                 </div>
                               );
                             })
@@ -1460,9 +1483,9 @@ const Admin = () => {
                 </div>
               </div>
 
-              {/* CONFLICT MODAL */}
+              {/* CONFLICT MODAL ONLY FOR BLOCKING ACTIVE TIMES */}
               {conflictModalOpen && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
                    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in">
                      <div className="flex items-center gap-3 text-red-600 mb-4 border-b border-red-100 pb-4">
                        <AlertTriangle size={28} />
@@ -1475,8 +1498,8 @@ const Admin = () => {
                      <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6 max-h-60 overflow-y-auto">
                        {conflictingBookings.map(b => (
                          <div key={b.id} className="border-b last:border-0 border-gray-200 py-2">
-                           <p className="font-bold text-dark">{b.first_name} {b.last_name}</p>
-                           <p className="text-sm text-gray-500">Időpont: {new Date(b.booking_datetime).toLocaleString('hu-HU')}</p>
+                           <p className="font-bold text-dark flex items-center gap-2"><User size={16} /> {b.first_name} {b.last_name}</p>
+                           <p className="text-sm text-gray-500 mt-1">Időpont: {new Date(b.booking_datetime).toLocaleString('hu-HU')}</p>
                            <p className="text-sm text-gray-500">Email: {b.email}</p>
                          </div>
                        ))}
@@ -1486,11 +1509,23 @@ const Admin = () => {
                        <button onClick={() => setConflictModalOpen(false)} className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
                          Mégsem
                        </button>
-                       <button onClick={confirmBlockWithConflicts} className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition shadow-md">
-                         Biztosan letiltom
+                       <button onClick={confirmBlockWithConflicts} className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition shadow-md flex justify-center items-center gap-2">
+                         <Ban size={18} /> Biztosan letiltom
                        </button>
                      </div>
                    </div>
+                </div>
+              )}
+
+              {/* GENERAL ALERT MODAL */}
+              {generalAlertMsg && (
+                <div className="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-4">
+                  <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 animate-fade-in text-center">
+                    <p className="text-gray-800 text-lg font-medium mb-6">{generalAlertMsg}</p>
+                    <button onClick={() => setGeneralAlertMsg(null)} className="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-primary/90 transition w-full">
+                      Rendben
+                    </button>
+                  </div>
                 </div>
               )}
 
