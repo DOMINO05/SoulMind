@@ -196,6 +196,13 @@ const Jelentkezes = () => {
     return false;
   };
 
+  const scrollToForm = () => {
+    const formElement = document.getElementById('booking-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden mt-10">
