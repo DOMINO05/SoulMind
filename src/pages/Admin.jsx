@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,7 +8,7 @@ const Admin = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('responses');
   const [contentSubTab, setContentSubTab] = useState('services'); // 'services' or 'home'
-  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [] });
+  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [], bookings: [], blockedTimes: [] });
   const [refresh, setRefresh] = useState(0);
   
   const [uploading, setUploading] = useState(false);
@@ -40,17 +40,23 @@ const Admin = () => {
   const [editingMemberId, setEditingMemberId] = useState(null);
   const [editMemberData, setEditMemberData] = useState({ name: '', bio: '' });
 
+  // Booking & Blocking State
+  const [newBlock, setNewBlock] = useState({ date: '', startTime: '', endTime: '', isFullDay: true, reason: '' });
+  const [expandedBookingId, setExpandedBookingId] = useState(null);
+
 
   useEffect(() => {
     const load = async () => {
-      const [s, i, t, r, v, tm, p] = await Promise.all([
+      const [s, i, t, r, v, tm, p, b, bt] = await Promise.all([
         supabase.from('sections').select('*').order('sort_order', { ascending: true }),
         supabase.from('section_items').select('*').order('id', { ascending: true }),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
         supabase.from('questionnaire').select('*').order('created_at', { ascending: false }),
         supabase.from('volumes').select('*').order('id'),
         supabase.from('team_members').select('*').order('id'),
-        supabase.from('prices').select('*').order('sort_order', { ascending: true })
+        supabase.from('prices').select('*').order('sort_order', { ascending: true }),
+        supabase.from('consultation_bookings').select('*').order('booking_datetime', { ascending: false }),
+        supabase.from('blocked_times').select('*').order('block_date', { ascending: false })
       ]);
       setData({ 
         sections: s.data || [], 
@@ -59,11 +65,47 @@ const Admin = () => {
         responses: r.data || [],
         volumes: v.data || [],
         team: tm.data || [],
-        prices: p.data || []
+        prices: p.data || [],
+        bookings: b.data || [],
+        blockedTimes: bt.data || []
       });
     };
     load();
   }, [refresh]);
+
+  // --- BOOKING OPERATIONS ---
+  const updateBookingStatus = async (id, newStatus, email, name) => {
+    const { error } = await supabase.from('consultation_bookings').update({ status: newStatus }).eq('id', id);
+    if (error) {
+      alert('Hiba a státusz frissítésekor!');
+    } else {
+      triggerRefresh();
+      
+      // Ha elutasítjuk, nyissunk meg egy mailto linket
+      if (newStatus === 'rejected') {
+        const subject = encodeURIComponent("Vezetői Konzultáció - Időpont egyeztetés");
+        const body = encodeURIComponent(`Kedves ${name}!\n\nKöszönöm a jelentkezésedet a vezetői konzultációra. Sajnos a választott időpontban nem tudjuk megtartani a beszélgetést.\n\nKérlek, egyeztessünk egy új időpontot, vagy jelezd felém a megfelelő alternatívákat.\n\nÜdvözlettel,\nDr. Polonyi Tünde`);
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+      }
+    }
+  };
+
+  const addBlock = async () => {
+    if (!newBlock.date) return alert("A dátum megadása kötelező!");
+    const { error } = await supabase.from('blocked_times').insert({
+      block_date: newBlock.date,
+      start_time: newBlock.isFullDay ? null : newBlock.startTime || null,
+      end_time: newBlock.isFullDay ? null : newBlock.endTime || null,
+      is_full_day: newBlock.isFullDay,
+      reason: newBlock.reason
+    });
+    if (error) {
+      alert('Hiba a letiltás mentésekor');
+    } else {
+      setNewBlock({ date: '', startTime: '', endTime: '', isFullDay: true, reason: '' });
+      triggerRefresh();
+    }
+  };
 
   const triggerRefresh = () => setRefresh(p => p + 1);
 
@@ -390,7 +432,9 @@ const Admin = () => {
           <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="team" label="Munkatársak" icon={User} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
-          <TabButton id="responses" label="Jelentkezők" icon={Users} />
+          <TabButton id="responses" label="Űrlapok" icon={Users} />
+          <TabButton id="bookings" label="Konzultációk" icon={CalendarIcon} />
+          <TabButton id="blocked" label="Naptár Letiltások" icon={Ban} />
           
           <div className="ml-auto p-2 flex items-center gap-4">
             <span className="text-xs text-gray-500 hidden md:inline">{user?.email}</span>
@@ -937,6 +981,169 @@ const Admin = () => {
               )}
             </div>
           )}
+
+          {/* BOOKINGS */}
+          {activeTab === 'bookings' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-dark mb-4">Vezetői Konzultációs Foglalások</h2>
+              <div className="grid gap-4">
+                {data.bookings.map(b => (
+                  <div key={b.id} className="bg-white border border-gray-200 rounded-[8px] p-4 shadow-sm hover:shadow-md transition">
+                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                      
+                      <div className="flex-1 cursor-pointer" onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}>
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-bold text-lg">{b.first_name} {b.last_name}</h3>
+                          <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
+                            b.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            b.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {b.status === 'pending' ? 'Függőben' : b.status === 'approved' ? 'Elfogadva' : 'Elutasítva'}
+                          </span>
+                        </div>
+                        <div className="text-primary font-medium mt-1 flex items-center gap-2">
+                          <CalendarIcon size={16} />
+                          {new Date(b.booking_datetime).toLocaleString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {b.status === 'pending' && (
+                          <>
+                            <button onClick={() => updateBookingStatus(b.id, 'approved', b.email, b.first_name)} className="bg-green-500 text-white px-4 py-2 rounded-[4px] hover:bg-green-600 transition flex items-center gap-1 font-medium text-sm"><Check size={16}/> Elfogad</button>
+                            <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-red-500 text-white px-4 py-2 rounded-[4px] hover:bg-red-600 transition flex items-center gap-1 font-medium text-sm"><X size={16}/> Elutasít</button>
+                          </>
+                        )}
+                        {b.status === 'rejected' && (
+                          <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-[4px] hover:bg-blue-100 transition flex items-center gap-1 font-medium text-sm"><Mail size={16}/> Új email (Sablon)</button>
+                        )}
+                        <button onClick={() => deleteItem('consultation_bookings', b.id)} className="bg-gray-100 text-gray-600 p-2 rounded-[4px] hover:bg-red-50 hover:text-red-600 transition"><Trash2 size={18}/></button>
+                      </div>
+
+                    </div>
+
+                    {expandedBookingId === b.id && (
+                      <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-[6px]">
+                        <div>
+                          <p className="text-sm text-gray-500">Kapcsolat:</p>
+                          <p className="font-medium"><a href={`mailto:${b.email}`} className="text-primary hover:underline">{b.email}</a></p>
+                          <p className="font-medium"><a href={`tel:${b.phone}`} className="text-primary hover:underline">{b.phone}</a></p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Cégtípus:</p>
+                          <p className="font-medium">{b.company_type}</p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <p className="text-sm text-gray-500">Legnagyobb kihívás:</p>
+                          <p className="font-medium whitespace-pre-wrap mt-1">{b.biggest_challenge}</p>
+                        </div>
+                        {b.admin_notes && (
+                          <div className="md:col-span-2 mt-2 pt-2 border-t border-gray-200">
+                            <p className="text-sm text-gray-500">Belső megjegyzés:</p>
+                            <p className="font-medium text-blue-800">{b.admin_notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {data.bookings.length === 0 && <p className="text-center py-8 text-gray-500">Nincs még beérkezett foglalás.</p>}
+              </div>
+            </div>
+          )}
+
+          {/* BLOCKED TIMES */}
+          {activeTab === 'blocked' && (
+            <div className="space-y-8">
+              <div className="bg-red-50 p-6 rounded-[8px] border border-red-100">
+                <h4 className="font-bold text-red-900 text-lg mb-4 flex items-center gap-2"><Ban size={20} /> Nap/Időpont Letiltása</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-red-800 mb-1">Dátum *</label>
+                    <input 
+                      type="date" 
+                      value={newBlock.date}
+                      onChange={(e) => setNewBlock({...newBlock, date: e.target.value})}
+                      className="w-full border border-red-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none"
+                    />
+                  </div>
+                  <div className="flex items-center pt-6">
+                    <label className="flex items-center gap-2 cursor-pointer text-red-900 font-medium">
+                      <input 
+                        type="checkbox" 
+                        checked={newBlock.isFullDay}
+                        onChange={(e) => setNewBlock({...newBlock, isFullDay: e.target.checked, startTime: '', endTime: ''})}
+                        className="w-4 h-4 text-red-600 focus:ring-red-500 rounded"
+                      />
+                      Egész napos letiltás
+                    </label>
+                  </div>
+                  {!newBlock.isFullDay && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-red-800 mb-1">Kezdő időpont</label>
+                        <input 
+                          type="time" 
+                          value={newBlock.startTime}
+                          onChange={(e) => setNewBlock({...newBlock, startTime: e.target.value})}
+                          className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-red-800 mb-1">Záró időpont</label>
+                        <input 
+                          type="time" 
+                          value={newBlock.endTime}
+                          onChange={(e) => setNewBlock({...newBlock, endTime: e.target.value})}
+                          className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none"
+                        />
+                      </div>
+                    </>
+                  )}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-red-800 mb-1">Megjegyzés (Opcionális - csak neked látható)</label>
+                    <input 
+                      type="text" 
+                      placeholder="Pl. szabadság, betegség, ügyfél személyes találkozó..." 
+                      value={newBlock.reason}
+                      onChange={(e) => setNewBlock({...newBlock, reason: e.target.value})}
+                      className="w-full border border-red-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none"
+                    />
+                  </div>
+                  <div className="md:col-span-2 flex justify-end">
+                     <button 
+                       onClick={addBlock} 
+                       className="bg-red-600 text-white px-6 py-2 rounded-[4px] hover:bg-red-700 transition shadow-md flex items-center gap-2"
+                     >
+                       Letiltás mentése
+                     </button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-dark">Aktív letiltások</h3>
+                <div className="grid gap-3">
+                  {data.blockedTimes.map(bt => (
+                    <div key={bt.id} className="bg-white border border-gray-200 rounded-[8px] p-4 flex justify-between items-center shadow-sm">
+                      <div>
+                        <div className="font-bold text-lg text-dark flex items-center gap-2">
+                          <CalendarIcon size={18} className="text-red-500" />
+                          {bt.block_date} 
+                          {bt.is_full_day ? <span className="text-red-500 text-sm bg-red-50 px-2 py-0.5 rounded ml-2">Egész nap</span> : <span className="text-gray-500 text-sm ml-2">{bt.start_time?.substring(0,5)} - {bt.end_time?.substring(0,5)}</span>}
+                        </div>
+                        {bt.reason && <p className="text-gray-500 text-sm mt-1">{bt.reason}</p>}
+                      </div>
+                      <button onClick={() => deleteItem('blocked_times', bt.id)} className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-[4px] transition"><Trash2 size={18}/></button>
+                    </div>
+                  ))}
+                  {data.blockedTimes.length === 0 && <p className="text-gray-500 italic">Nincsenek beállítva letiltások.</p>}
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

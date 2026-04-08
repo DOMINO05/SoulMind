@@ -5,7 +5,8 @@ import Home from './pages/Home';
 import Services from './pages/Services';
 import Prices from './pages/Prices';
 import Team from './pages/Team';
-import Application from './pages/Application';
+import Jelentkezes from './pages/Jelentkezes';
+import SikeresJelentkezes from './pages/Jelentkezes/Sikeres';
 import Admin from './pages/Admin';
 import Volumes from './pages/Volumes';
 import Login from './pages/Login';
@@ -30,7 +31,8 @@ function App() {
               <Route path="/araink" element={<Prices />} />
               <Route path="/munkatarsak" element={<Team />} />
               <Route path="/kotetek" element={<Volumes />} />
-              <Route path="/jelentkezes" element={<Application />} />
+              <Route path="/jelentkezes" element={<Jelentkezes />} />
+              <Route path="/jelentkezes/sikeres" element={<SikeresJelentkezes />} />
               <Route path="/soulmind-login-2025" element={<Login />} />
               <Route path="/soulmind-register-2025" element={<Register />} />
               <Route 
