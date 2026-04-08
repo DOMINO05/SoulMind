@@ -65,13 +65,13 @@ const Jelentkezes = () => {
     // Alap szabályok napok szerint
     if (dayOfWeek === 1 || dayOfWeek === 2) {
       // Hétfő, Kedd: 08:00 - 12:00
-      possibleTimes = ['08:00', '09:00', '10:00', '11:00', '12:00'];
+      possibleTimes = ['08:00', '09:00', '10:00', '11:00'];
     } else if (dayOfWeek === 4) {
       // Csütörtök: 17:00 - 20:00
-      possibleTimes = ['17:00', '18:00', '19:00', '20:00'];
+      possibleTimes = ['17:00', '18:00', '19:00'];
     } else if (dayOfWeek === 5) {
       // Péntek: 08:00 - 16:00
-      possibleTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+      possibleTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
     }
 
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -278,20 +278,25 @@ const Jelentkezes = () => {
                     <h3 className="text-lg font-medium mb-4">Válassz időpontot</h3>
                     {formData.bookingDate ? (
                       <div className="grid grid-cols-2 gap-2">
-                        {availableTimes.map((time) => (
-                          <button
-                            key={time}
-                            type="button"
-                            onClick={() => handleTimeSelect(time)}
-                            className={`p-3 text-center border rounded-md transition-colors ${
-                              formData.bookingTime === time 
-                                ? 'bg-red-800 text-white border-red-800' 
-                                : 'border-gray-300 hover:border-red-800 hover:text-red-800'
-                            }`}
-                          >
-                            {time}
-                          </button>
-                        ))}
+                        {availableTimes.map((time) => {
+                          const hour = parseInt(time.split(':')[0], 10);
+                          const nextHour = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                          const timeRange = `${time} - ${nextHour}`;
+                          return (
+                            <button
+                              key={time}
+                              type="button"
+                              onClick={() => handleTimeSelect(time)}
+                              className={`p-3 text-center border rounded-md transition-colors ${
+                                formData.bookingTime === time 
+                                  ? 'bg-red-800 text-white border-red-800' 
+                                  : 'border-gray-300 hover:border-red-800 hover:text-red-800'
+                              }`}
+                            >
+                              {timeRange}
+                            </button>
+                          );
+                        })}
                       </div>
                     ) : (
                       <p className="text-gray-500 italic">Kérlek, előbb válassz egy napot a naptárban.</p>

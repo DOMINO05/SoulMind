@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban, AlertTriangle } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import { format, isWeekend, parseISO, startOfDay } from 'date-fns';
+import { hu } from 'date-fns/locale';
 
 const Admin = () => {
   const { signOut, user } = useAuth();
@@ -43,7 +47,16 @@ const Admin = () => {
   // Booking & Blocking State
   const [newBlock, setNewBlock] = useState({ date: '', startTime: '', endTime: '', isFullDay: true, reason: '' });
   const [expandedBookingId, setExpandedBookingId] = useState(null);
-
+  
+  // Booking Sort State ('status' or 'time')
+  const [bookingSort, setBookingSort] = useState('status');
+  const [showRejected, setShowRejected] = useState(false);
+  
+  // Advanced Blocking Calendar State
+  const [selectedBlockDate, setSelectedBlockDate] = useState(new Date());
+  const [conflictModalOpen, setConflictModalOpen] = useState(false);
+  const [conflictingBookings, setConflictingBookings] = useState([]);
+  const [pendingBlockAction, setPendingBlockAction] = useState(null); // mit akartunk épp menteni
 
   useEffect(() => {
     const load = async () => {
@@ -92,19 +105,107 @@ const Admin = () => {
 
   const addBlock = async () => {
     if (!newBlock.date) return alert("A dátum megadása kötelező!");
-    const { error } = await supabase.from('blocked_times').insert({
+    
+    // Check conflicts
+    const dateStr = newBlock.date;
+    const activeBookings = data.bookings.filter(b => b.status === 'pending' || b.status === 'approved');
+    const conflicts = activeBookings.filter(b => {
+      const bDate = new Date(b.booking_datetime);
+      if (format(bDate, 'yyyy-MM-dd') !== dateStr) return false;
+      if (newBlock.isFullDay) return true;
+      
+      const bTime = format(bDate, 'HH:mm');
+      return bTime >= newBlock.startTime && bTime < newBlock.endTime;
+    });
+
+    if (conflicts.length > 0) {
+      setConflictingBookings(conflicts);
+      setPendingBlockAction({
+        block_date: newBlock.date,
+        start_time: newBlock.isFullDay ? null : newBlock.startTime || null,
+        end_time: newBlock.isFullDay ? null : newBlock.endTime || null,
+        is_full_day: newBlock.isFullDay,
+        reason: newBlock.reason
+      });
+      setConflictModalOpen(true);
+      return;
+    }
+
+    await executeBlockInsert({
       block_date: newBlock.date,
       start_time: newBlock.isFullDay ? null : newBlock.startTime || null,
       end_time: newBlock.isFullDay ? null : newBlock.endTime || null,
       is_full_day: newBlock.isFullDay,
       reason: newBlock.reason
     });
+  };
+
+  const executeBlockInsert = async (blockData) => {
+    const { error } = await supabase.from('blocked_times').insert(blockData);
     if (error) {
       alert('Hiba a letiltás mentésekor');
     } else {
-      setNewBlock({ date: '', startTime: '', endTime: '', isFullDay: true, reason: '' });
+      setNewBlock({ date: format(selectedBlockDate, 'yyyy-MM-dd'), startTime: '', endTime: '', isFullDay: true, reason: '' });
       triggerRefresh();
     }
+  };
+
+  const confirmBlockWithConflicts = async () => {
+    setConflictModalOpen(false);
+    
+    // Elutasítjuk a konfliktusos foglalásokat
+    for (const b of conflictingBookings) {
+       await supabase.from('consultation_bookings').update({ status: 'rejected' }).eq('id', b.id);
+       
+       // Itt automatikusan nyithatnánk a mailto linkeket is, de ha sok van, megzavarhatja a böngészőt.
+       // Esetleg utólag manuálisan intézheti, vagy itt dobunk fel egyet
+       const subject = encodeURIComponent("Vezetői Konzultáció - Időpont változás");
+       const body = encodeURIComponent(`Kedves ${b.first_name}!\n\nA választott időpontban (${new Date(b.booking_datetime).toLocaleString('hu-HU')}) sajnos nem tudjuk megtartani a beszélgetést. Kérlek egyeztessünk új időpontot!\n\nÜdv,\nDr. Polonyi Tünde`);
+       window.open(`mailto:${b.email}?subject=${subject}&body=${body}`, '_blank');
+    }
+    
+    // Utána beszúrjuk magát a letiltást
+    if (pendingBlockAction) {
+       await executeBlockInsert(pendingBlockAction);
+       setPendingBlockAction(null);
+    }
+  };
+
+  const handleAdminDateChange = (date) => {
+    setSelectedBlockDate(date);
+    setNewBlock(prev => ({ ...prev, date: format(date, 'yyyy-MM-dd') }));
+  };
+
+  const getDayAvailability = (date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    
+    // Szűrés a már letiltott időpontokra
+    const dayBlocks = data.blockedTimes.filter(b => b.block_date === dateStr);
+    
+    // Szűrés a már lefoglalt időpontokra
+    const dayBookings = data.bookings.filter(b => 
+      (b.status === 'pending' || b.status === 'approved') && 
+      format(new Date(b.booking_datetime), 'yyyy-MM-dd') === dateStr
+    );
+
+    return { dayBlocks, dayBookings };
+  };
+
+  const adminTileContent = ({ date, view }) => {
+    if (view !== 'month' || isWeekend(date)) return null;
+    const { dayBlocks, dayBookings } = getDayAvailability(date);
+    const hasFullBlock = dayBlocks.some(b => b.is_full_day);
+
+    if (hasFullBlock) {
+      return <div className="w-full h-1 mt-1 bg-red-500 rounded-full" title="Egész nap letiltva"></div>;
+    }
+
+    return (
+      <div className="flex gap-1 mt-1 justify-center">
+        {dayBlocks.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-orange-400" title="Részleges letiltás"></div>}
+        {dayBookings.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" title="Létező foglalás"></div>}
+      </div>
+    );
   };
 
   const triggerRefresh = () => setRefresh(p => p + 1);
@@ -985,70 +1086,168 @@ const Admin = () => {
           {/* BOOKINGS */}
           {activeTab === 'bookings' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-dark mb-4">Vezetői Konzultációs Foglalások</h2>
-              <div className="grid gap-4">
-                {data.bookings.map(b => (
-                  <div key={b.id} className="bg-white border border-gray-200 rounded-[8px] p-4 shadow-sm hover:shadow-md transition">
-                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                      
-                      <div className="flex-1 cursor-pointer" onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}>
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-bold text-lg">{b.first_name} {b.last_name}</h3>
-                          <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                            b.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            b.status === 'approved' ? 'bg-green-100 text-green-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {b.status === 'pending' ? 'Függőben' : b.status === 'approved' ? 'Elfogadva' : 'Elutasítva'}
-                          </span>
-                        </div>
-                        <div className="text-primary font-medium mt-1 flex items-center gap-2">
-                          <CalendarIcon size={16} />
-                          {new Date(b.booking_datetime).toLocaleString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 className="text-2xl font-bold text-dark">Vezetői Konzultációs Foglalások</h2>
+                
+                <div className="flex bg-gray-200 rounded-[8px] p-1 w-full sm:w-auto">
+                  <button 
+                    onClick={() => setBookingSort('status')}
+                    className={`flex-1 sm:flex-none px-4 py-2 rounded-[6px] text-sm font-medium transition-all ${bookingSort === 'status' ? 'bg-white shadow-sm text-primary' : 'text-gray-600 hover:text-gray-900'}`}
+                  >
+                    Státusz szerint
+                  </button>
+                  <button 
+                    onClick={() => setBookingSort('time')}
+                    className={`flex-1 sm:flex-none px-4 py-2 rounded-[6px] text-sm font-medium transition-all ${bookingSort === 'time' ? 'bg-white shadow-sm text-primary' : 'text-gray-600 hover:text-gray-900'}`}
+                  >
+                    Időpont szerint
+                  </button>
+                </div>
+              </div>
 
-                      <div className="flex gap-2">
-                        {b.status === 'pending' && (
-                          <>
-                            <button onClick={() => updateBookingStatus(b.id, 'approved', b.email, b.first_name)} className="bg-green-500 text-white px-4 py-2 rounded-[4px] hover:bg-green-600 transition flex items-center gap-1 font-medium text-sm"><Check size={16}/> Elfogad</button>
-                            <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-red-500 text-white px-4 py-2 rounded-[4px] hover:bg-red-600 transition flex items-center gap-1 font-medium text-sm"><X size={16}/> Elutasít</button>
-                          </>
-                        )}
-                        {b.status === 'rejected' && (
-                          <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-[4px] hover:bg-blue-100 transition flex items-center gap-1 font-medium text-sm"><Mail size={16}/> Új email (Sablon)</button>
-                        )}
-                        <button onClick={() => deleteItem('consultation_bookings', b.id)} className="bg-gray-100 text-gray-600 p-2 rounded-[4px] hover:bg-red-50 hover:text-red-600 transition"><Trash2 size={18}/></button>
-                      </div>
+              <div className="grid gap-6">
+                {(() => {
+                  if (data.bookings.length === 0) return <p className="text-center py-8 text-gray-500">Nincs még beérkezett foglalás.</p>;
 
-                    </div>
+                  // Helper function to render a single booking card
+                  const renderBookingCard = (b) => {
+                    const bookingDateObj = new Date(b.booking_datetime);
+                    const formattedDate = bookingDateObj.toLocaleString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+                    const startHour = bookingDateObj.getHours();
+                    const startMin = bookingDateObj.getMinutes().toString().padStart(2, '0');
+                    const nextHourStr = `${(startHour + 1).toString().padStart(2, '0')}:${startMin}`;
+                    const formattedTimeRange = `${startHour.toString().padStart(2, '0')}:${startMin} - ${nextHourStr}`;
 
-                    {expandedBookingId === b.id && (
-                      <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-[6px]">
-                        <div>
-                          <p className="text-sm text-gray-500">Kapcsolat:</p>
-                          <p className="font-medium"><a href={`mailto:${b.email}`} className="text-primary hover:underline">{b.email}</a></p>
-                          <p className="font-medium"><a href={`tel:${b.phone}`} className="text-primary hover:underline">{b.phone}</a></p>
+                    return (
+                      <div key={b.id} className="bg-white border border-gray-200 rounded-[8px] p-4 shadow-sm hover:shadow-md transition">
+                        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                          
+                          <div className="flex-1 cursor-pointer" onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}>
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-bold text-lg">{b.first_name} {b.last_name}</h3>
+                              <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
+                                b.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                b.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {b.status === 'pending' ? 'Függőben' : b.status === 'approved' ? 'Elfogadva' : 'Elutasítva'}
+                              </span>
+                            </div>
+                            <div className="text-primary font-medium mt-1 flex items-center gap-2">
+                              <CalendarIcon size={16} />
+                              {formattedDate}, {formattedTimeRange}
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            {b.status === 'pending' && (
+                              <>
+                                <button onClick={() => updateBookingStatus(b.id, 'approved', b.email, b.first_name)} className="bg-green-500 text-white px-4 py-2 rounded-[4px] hover:bg-green-600 transition flex items-center gap-1 font-medium text-sm"><Check size={16}/> Elfogad</button>
+                                <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-red-500 text-white px-4 py-2 rounded-[4px] hover:bg-red-600 transition flex items-center gap-1 font-medium text-sm"><X size={16}/> Elutasít</button>
+                              </>
+                            )}
+                            {b.status === 'rejected' && (
+                              <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-[4px] hover:bg-blue-100 transition flex items-center gap-1 font-medium text-sm"><Mail size={16}/> Új email (Sablon)</button>
+                            )}
+                            <button onClick={() => deleteItem('consultation_bookings', b.id)} className="bg-gray-100 text-gray-600 p-2 rounded-[4px] hover:bg-red-50 hover:text-red-600 transition"><Trash2 size={18}/></button>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Cégtípus:</p>
-                          <p className="font-medium">{b.company_type}</p>
-                        </div>
-                        <div className="md:col-span-2">
-                          <p className="text-sm text-gray-500">Legnagyobb kihívás:</p>
-                          <p className="font-medium whitespace-pre-wrap mt-1">{b.biggest_challenge}</p>
-                        </div>
-                        {b.admin_notes && (
-                          <div className="md:col-span-2 mt-2 pt-2 border-t border-gray-200">
-                            <p className="text-sm text-gray-500">Belső megjegyzés:</p>
-                            <p className="font-medium text-blue-800">{b.admin_notes}</p>
+
+                        {expandedBookingId === b.id && (
+                          <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-[6px] animate-fade-in">
+                            <div>
+                              <p className="text-sm text-gray-500">Kapcsolat:</p>
+                              <p className="font-medium"><a href={`mailto:${b.email}`} className="text-primary hover:underline">{b.email}</a></p>
+                              <p className="font-medium"><a href={`tel:${b.phone}`} className="text-primary hover:underline">{b.phone}</a></p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Cégtípus:</p>
+                              <p className="font-medium">{b.company_type}</p>
+                            </div>
+                            <div className="md:col-span-2">
+                              <p className="text-sm text-gray-500">Legnagyobb kihívás:</p>
+                              <p className="font-medium whitespace-pre-wrap mt-1">{b.biggest_challenge}</p>
+                            </div>
+                            {b.admin_notes && (
+                              <div className="md:col-span-2 mt-2 pt-2 border-t border-gray-200">
+                                <p className="text-sm text-gray-500">Belső megjegyzés:</p>
+                                <p className="font-medium text-blue-800">{b.admin_notes}</p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                ))}
-                {data.bookings.length === 0 && <p className="text-center py-8 text-gray-500">Nincs még beérkezett foglalás.</p>}
+                    );
+                  };
+
+                  if (bookingSort === 'time') {
+                    // Csak a függőben lévő és elfogadott foglalások kellenek
+                    const activeBookings = data.bookings
+                      .filter(b => b.status !== 'rejected')
+                      .sort((a, b) => new Date(a.booking_datetime) - new Date(b.booking_datetime)); // Növekvő sorrend (legközelebbi legelöl)
+
+                    if (activeBookings.length === 0) return <p className="text-gray-500">Nincs aktív foglalás.</p>;
+                    
+                    return <div className="space-y-3">{activeBookings.map(b => renderBookingCard(b))}</div>;
+                  } 
+                  
+                  if (bookingSort === 'status') {
+                    const pending = data.bookings.filter(b => b.status === 'pending').sort((a,b) => new Date(a.booking_datetime) - new Date(b.booking_datetime));
+                    const approved = data.bookings.filter(b => b.status === 'approved').sort((a,b) => new Date(a.booking_datetime) - new Date(b.booking_datetime));
+                    const rejected = data.bookings.filter(b => b.status === 'rejected').sort((a,b) => new Date(b.booking_datetime) - new Date(a.booking_datetime)); // Elutasítottaknál a legutóbbi felül
+
+                    return (
+                      <div className="space-y-8">
+                        {/* PENDING SECTION */}
+                        <div>
+                          <h3 className="text-lg font-bold text-yellow-800 border-b border-yellow-200 pb-2 mb-4 flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            Függőben lévő foglalások ({pending.length})
+                          </h3>
+                          {pending.length > 0 ? (
+                            <div className="space-y-3">{pending.map(b => renderBookingCard(b))}</div>
+                          ) : (
+                            <p className="text-gray-500 italic text-sm">Nincsenek elbírálásra váró jelentkezések.</p>
+                          )}
+                        </div>
+
+                        {/* APPROVED SECTION */}
+                        <div>
+                          <h3 className="text-lg font-bold text-green-800 border-b border-green-200 pb-2 mb-4 flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            Elfogadott konzultációk ({approved.length})
+                          </h3>
+                          {approved.length > 0 ? (
+                            <div className="space-y-3">{approved.map(b => renderBookingCard(b))}</div>
+                          ) : (
+                            <p className="text-gray-500 italic text-sm">Nincsenek elfogadott időpontok.</p>
+                          )}
+                        </div>
+
+                        {/* REJECTED SECTION */}
+                        {rejected.length > 0 && (
+                          <div className="border border-gray-200 rounded-[8px] overflow-hidden bg-gray-50">
+                            <button 
+                              onClick={() => setShowRejected(!showRejected)}
+                              className="w-full flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 transition font-medium text-gray-700"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+                                Elutasított foglalások ({rejected.length})
+                              </div>
+                              {showRejected ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+                            </button>
+                            {showRejected && (
+                              <div className="p-4 space-y-3 bg-white">
+                                {rejected.map(b => renderBookingCard(b))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                })()}
               </div>
             </div>
           )}
@@ -1056,91 +1255,179 @@ const Admin = () => {
           {/* BLOCKED TIMES */}
           {activeTab === 'blocked' && (
             <div className="space-y-8">
-              <div className="bg-red-50 p-6 rounded-[8px] border border-red-100">
-                <h4 className="font-bold text-red-900 text-lg mb-4 flex items-center gap-2"><Ban size={20} /> Nap/Időpont Letiltása</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-red-800 mb-1">Dátum *</label>
-                    <input 
-                      type="date" 
-                      value={newBlock.date}
-                      onChange={(e) => setNewBlock({...newBlock, date: e.target.value})}
-                      className="w-full border border-red-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none"
-                    />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* CALENDAR VIEW */}
+                <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm flex flex-col items-center">
+                  <h4 className="font-bold text-dark text-lg mb-4 self-start w-full border-b pb-2">Naptár áttekintés</h4>
+                  <Calendar 
+                    onChange={handleAdminDateChange} 
+                    value={selectedBlockDate}
+                    locale="hu-HU"
+                    tileContent={adminTileContent}
+                    className="border-none shadow-sm rounded-lg p-2 w-full admin-calendar"
+                  />
+                  <div className="flex gap-4 mt-6 text-sm text-gray-600 justify-center w-full">
+                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div> Egész nap letiltva</span>
+                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-orange-400"></div> Részleges letiltás</span>
+                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div> Van foglalás</span>
                   </div>
-                  <div className="flex items-center pt-6">
-                    <label className="flex items-center gap-2 cursor-pointer text-red-900 font-medium">
+                </div>
+
+                {/* ADD BLOCK FORM */}
+                <div className="bg-red-50 p-6 rounded-[8px] border border-red-100 flex flex-col h-full">
+                  <h4 className="font-bold text-red-900 text-lg mb-4 flex items-center gap-2 border-b border-red-200 pb-2">
+                    <Ban size={20} /> Letiltás hozzáadása erre a napra: 
+                    <span className="bg-red-800 text-white px-2 py-1 rounded text-sm">{format(selectedBlockDate, 'yyyy. MM. dd.', { locale: hu })}</span>
+                  </h4>
+                  
+                  {/* Status of the selected day */}
+                  {(() => {
+                     const { dayBlocks, dayBookings } = getDayAvailability(selectedBlockDate);
+                     return (
+                       <div className="mb-6 bg-white p-4 rounded border border-red-100 text-sm">
+                         <h5 className="font-bold text-gray-700 mb-2">A nap státusza:</h5>
+                         {dayBookings.length > 0 ? (
+                           <ul className="list-disc pl-4 text-blue-700 space-y-1 mb-2">
+                             {dayBookings.map(b => (
+                               <li key={b.id}>
+                                 Foglalás: <b>{new Date(b.booking_datetime).toLocaleTimeString('hu-HU', {hour: '2-digit', minute:'2-digit'})}</b> ({b.first_name} {b.last_name})
+                               </li>
+                             ))}
+                           </ul>
+                         ) : <p className="text-gray-500 italic mb-2">Nincs aktív foglalás erre a napra.</p>}
+
+                         {dayBlocks.length > 0 ? (
+                           <ul className="list-disc pl-4 text-orange-700 space-y-1">
+                             {dayBlocks.map(b => (
+                               <li key={b.id}>
+                                 Letiltva: <b>{b.is_full_day ? 'Egész nap' : `${b.start_time?.substring(0,5)} - ${b.end_time?.substring(0,5)}`}</b> {b.reason && `(${b.reason})`}
+                               </li>
+                             ))}
+                           </ul>
+                         ) : <p className="text-gray-500 italic">Nincs érvényes letiltás erre a napra.</p>}
+                       </div>
+                     );
+                  })()}
+
+                  <div className="grid grid-cols-1 gap-4 flex-grow">
+                    <div className="flex items-center">
+                      <label className="flex items-center gap-2 cursor-pointer text-red-900 font-medium bg-red-100/50 p-3 rounded-md w-full border border-red-200">
+                        <input 
+                          type="checkbox" 
+                          checked={newBlock.isFullDay}
+                          onChange={(e) => setNewBlock({...newBlock, isFullDay: e.target.checked, startTime: '', endTime: ''})}
+                          className="w-5 h-5 text-red-600 focus:ring-red-500 rounded border-gray-300"
+                        />
+                        A teljes nap letiltása
+                      </label>
+                    </div>
+
+                    {!newBlock.isFullDay && (
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-red-800 mb-1">Kezdő (pl. 13:00)</label>
+                          <input 
+                            type="time" 
+                            value={newBlock.startTime}
+                            onChange={(e) => setNewBlock({...newBlock, startTime: e.target.value})}
+                            className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none bg-white"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-red-800 mb-1">Záró (pl. 16:00)</label>
+                          <input 
+                            type="time" 
+                            value={newBlock.endTime}
+                            onChange={(e) => setNewBlock({...newBlock, endTime: e.target.value})}
+                            className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none bg-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-red-800 mb-1">Megjegyzés (Opcionális - csak te látod)</label>
                       <input 
-                        type="checkbox" 
-                        checked={newBlock.isFullDay}
-                        onChange={(e) => setNewBlock({...newBlock, isFullDay: e.target.checked, startTime: '', endTime: ''})}
-                        className="w-4 h-4 text-red-600 focus:ring-red-500 rounded"
+                        type="text" 
+                        placeholder="Szabadság, orvos, stb..." 
+                        value={newBlock.reason}
+                        onChange={(e) => setNewBlock({...newBlock, reason: e.target.value})}
+                        className="w-full border border-red-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none bg-white"
                       />
-                      Egész napos letiltás
-                    </label>
-                  </div>
-                  {!newBlock.isFullDay && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-red-800 mb-1">Kezdő időpont</label>
-                        <input 
-                          type="time" 
-                          value={newBlock.startTime}
-                          onChange={(e) => setNewBlock({...newBlock, startTime: e.target.value})}
-                          className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-red-800 mb-1">Záró időpont</label>
-                        <input 
-                          type="time" 
-                          value={newBlock.endTime}
-                          onChange={(e) => setNewBlock({...newBlock, endTime: e.target.value})}
-                          className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none"
-                        />
-                      </div>
-                    </>
-                  )}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-red-800 mb-1">Megjegyzés (Opcionális - csak neked látható)</label>
-                    <input 
-                      type="text" 
-                      placeholder="Pl. szabadság, betegség, ügyfél személyes találkozó..." 
-                      value={newBlock.reason}
-                      onChange={(e) => setNewBlock({...newBlock, reason: e.target.value})}
-                      className="w-full border border-red-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none"
-                    />
-                  </div>
-                  <div className="md:col-span-2 flex justify-end">
-                     <button 
-                       onClick={addBlock} 
-                       className="bg-red-600 text-white px-6 py-2 rounded-[4px] hover:bg-red-700 transition shadow-md flex items-center gap-2"
-                     >
-                       Letiltás mentése
-                     </button>
+                    </div>
+                    
+                    <div className="flex justify-end items-end mt-auto pt-4">
+                       <button 
+                         onClick={addBlock} 
+                         className="bg-red-600 text-white px-6 py-3 rounded-[6px] hover:bg-red-700 transition shadow-md flex items-center gap-2 font-bold w-full justify-center"
+                       >
+                         <Ban size={18} /> Letiltás mentése
+                       </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-xl font-bold mb-4 text-dark">Aktív letiltások</h3>
+              {/* LIST OF BLOCKS */}
+              <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm">
+                <h3 className="text-xl font-bold mb-4 text-dark border-b pb-2">Összes aktív letiltás listája</h3>
                 <div className="grid gap-3">
                   {data.blockedTimes.map(bt => (
-                    <div key={bt.id} className="bg-white border border-gray-200 rounded-[8px] p-4 flex justify-between items-center shadow-sm">
+                    <div key={bt.id} className="bg-gray-50 border border-gray-200 rounded-[6px] p-4 flex justify-between items-center hover:bg-gray-100 transition">
                       <div>
                         <div className="font-bold text-lg text-dark flex items-center gap-2">
                           <CalendarIcon size={18} className="text-red-500" />
                           {bt.block_date} 
-                          {bt.is_full_day ? <span className="text-red-500 text-sm bg-red-50 px-2 py-0.5 rounded ml-2">Egész nap</span> : <span className="text-gray-500 text-sm ml-2">{bt.start_time?.substring(0,5)} - {bt.end_time?.substring(0,5)}</span>}
+                          {bt.is_full_day ? (
+                            <span className="text-white text-xs font-bold bg-red-500 px-2 py-1 rounded ml-2 uppercase">Egész nap</span>
+                          ) : (
+                            <span className="text-gray-700 font-bold bg-gray-200 px-2 py-1 rounded ml-2">{bt.start_time?.substring(0,5)} - {bt.end_time?.substring(0,5)}</span>
+                          )}
                         </div>
                         {bt.reason && <p className="text-gray-500 text-sm mt-1">{bt.reason}</p>}
                       </div>
-                      <button onClick={() => deleteItem('blocked_times', bt.id)} className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-[4px] transition"><Trash2 size={18}/></button>
+                      <button onClick={() => deleteItem('blocked_times', bt.id)} className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-[4px] transition bg-white shadow-sm border"><Trash2 size={18}/></button>
                     </div>
                   ))}
-                  {data.blockedTimes.length === 0 && <p className="text-gray-500 italic">Nincsenek beállítva letiltások.</p>}
+                  {data.blockedTimes.length === 0 && <p className="text-gray-500 italic text-center py-4">Nincsenek beállítva letiltások.</p>}
                 </div>
               </div>
+
+              {/* CONFLICT MODAL */}
+              {conflictModalOpen && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                   <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in">
+                     <div className="flex items-center gap-3 text-red-600 mb-4 border-b border-red-100 pb-4">
+                       <AlertTriangle size={28} />
+                       <h2 className="text-xl font-bold text-gray-900">Figyelem! Ütköző foglalások</h2>
+                     </div>
+                     <p className="text-gray-600 mb-4">
+                       A letiltani kívánt időpontban / napon a következő <b>aktív foglalások</b> találhatók. Ha megerősíted a letiltást, a rendszer ezeket a foglalásokat automatikusan <strong className="text-red-600">Elutasított</strong> státuszra állítja, és megnyílik a levelező egy elutasító sablonnal.
+                     </p>
+                     
+                     <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6 max-h-60 overflow-y-auto">
+                       {conflictingBookings.map(b => (
+                         <div key={b.id} className="border-b last:border-0 border-gray-200 py-2">
+                           <p className="font-bold text-dark">{b.first_name} {b.last_name}</p>
+                           <p className="text-sm text-gray-500">Időpont: {new Date(b.booking_datetime).toLocaleString('hu-HU')}</p>
+                           <p className="text-sm text-gray-500">Email: {b.email}</p>
+                         </div>
+                       ))}
+                     </div>
+
+                     <div className="flex gap-4">
+                       <button onClick={() => setConflictModalOpen(false)} className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                         Mégsem
+                       </button>
+                       <button onClick={confirmBlockWithConflicts} className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition shadow-md">
+                         Biztosan letiltom
+                       </button>
+                     </div>
+                   </div>
+                </div>
+              )}
+
             </div>
           )}
 
