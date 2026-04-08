@@ -337,6 +337,79 @@ const Jelentkezes = () => {
           </form>
         </div>
       </div>
+
+      {/* RESULTS SECTION */}
+      <section className="py-20 bg-gray-50 border-y border-gray-200">
+         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center text-dark mb-12">Nem a nyomás irányít, hanem képes leszel stabilan reagálni helyzetekben</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                 <h3 className="text-xl font-bold text-primary mb-3">Tiszta vezetői működés</h3>
+                 <p className="text-gray-600">Átláthatóbbá válik, hogyan kommunikálsz, döntesz és vezetsz.</p>
+               </div>
+               <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                 <h3 className="text-xl font-bold text-primary mb-3">Határozott keretek</h3>
+                 <p className="text-gray-600">Megtanulod megtartani a határaidat anélkül, hogy folyamatos feszültséget éreznél.</p>
+               </div>
+               <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                 <h3 className="text-xl font-bold text-primary mb-3">Delegálás és tehermentesítés</h3>
+                 <p className="text-gray-600">Nem mindent egyedül viszel, így felszabadul kapacitásod.</p>
+               </div>
+               <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                 <h3 className="text-xl font-bold text-primary mb-3">Egyensúly</h3>
+                 <p className="text-gray-600">A vezetői szereped mellett a saját életed is visszakerül a helyére.</p>
+               </div>
+            </div>
+
+            <div className="mt-16 text-center">
+              <p className="text-xl font-medium text-dark mb-8">Jelentkezz a konzultációra, hogy megtudd, hogyan tudsz határozottan működni anélkül, hogy közben kimerülnél</p>
+              <button 
+                onClick={scrollToForm}
+                className="bg-red-800 hover:bg-red-900 text-white text-xl font-bold py-4 px-10 rounded-[8px] shadow-lg transition-transform hover:scale-105 inline-flex items-center gap-2"
+              >
+                Jelentkezem a konzultációra <ChevronRight size={24} />
+              </button>
+            </div>
+         </div>
+      </section>
+
+      {/* ABOUT SECTION */}
+      <section className="py-24 bg-white">
+         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center gap-16">
+               <div className="md:w-3/5 space-y-6 text-lg text-gray-700 leading-relaxed font-medium">
+                  <h2 className="text-3xl md:text-4xl font-bold text-dark mb-8">Rólam</h2>
+                  <p>Olyan gyakorlati eszközöket adok át, amelyek növelik a vezetői hatékonyságot, fejlesztik a kommunikációt és együttműködést, támogatják a stresszkezelést és rezilienciát.</p>
+                  <p>Célom, hogy pszichológusként segítsek megoldani a legnehezebb vezetői kihívásokat.</p>
+                  <p>A leghatékonyabb fegyverem az a tudás, amely lehetővé teszi a kiégés megelőzését és a mentális jóllét fejlesztését.</p>
+                  <p className="p-6 bg-blue-50 text-blue-900 rounded-xl border border-blue-100 italic mt-8">
+                    "Szakmai hitvallásom, hogy a jó vezető önmagát ismeri a legjobban – és e tudást tudatosan használja saját csapata emberséges, lendületes és eredményes támogatására."
+                  </p>
+               </div>
+               
+               <div className="md:w-2/5 flex justify-center">
+                  <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden border-8 border-gray-50 shadow-2xl">
+                     <img src="/Polonyi_Tünde.jpg" alt="Dr. Polonyi Tünde" className="w-full h-full object-cover" />
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
+
+      {/* FINAL CTA SECTION */}
+      <section className="bg-dark text-white py-24 text-center border-t-8 border-primary">
+         <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-4xl font-bold mb-10 leading-tight">Jelentkezz a konzultációra, hogy egy olyan vezetővé válj, aki nem csak irányít, hanem szabadon is él közben</h2>
+            <button 
+              onClick={scrollToForm}
+              className="bg-red-600 hover:bg-red-700 text-white text-2xl font-bold py-5 px-12 rounded-[8px] shadow-2xl transition-transform hover:scale-105 inline-flex items-center gap-3 ring-4 ring-white/10"
+            >
+              Jelentkezem a konzultációra <ChevronRight size={28} />
+            </button>
+         </div>
+      </section>
+
     </div>
   );
 };
