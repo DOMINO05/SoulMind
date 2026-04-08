@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban, AlertTriangle } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban, AlertTriangle, Clock } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
 import Calendar from 'react-calendar';
@@ -12,7 +12,7 @@ const Admin = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('responses');
   const [contentSubTab, setContentSubTab] = useState('services'); // 'services' or 'home'
-  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [], bookings: [], blockedTimes: [] });
+  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [], bookings: [], blockedTimes: [], workingHours: [] });
   const [refresh, setRefresh] = useState(0);
   
   const [uploading, setUploading] = useState(false);
@@ -60,7 +60,7 @@ const Admin = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [s, i, t, r, v, tm, p, b, bt] = await Promise.all([
+      const [s, i, t, r, v, tm, p, b, bt, wh] = await Promise.all([
         supabase.from('sections').select('*').order('sort_order', { ascending: true }),
         supabase.from('section_items').select('*').order('id', { ascending: true }),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
@@ -69,7 +69,8 @@ const Admin = () => {
         supabase.from('team_members').select('*').order('id'),
         supabase.from('prices').select('*').order('sort_order', { ascending: true }),
         supabase.from('consultation_bookings').select('*').order('booking_datetime', { ascending: false }),
-        supabase.from('blocked_times').select('*').order('block_date', { ascending: false })
+        supabase.from('blocked_times').select('*').order('block_date', { ascending: false }),
+        supabase.from('working_hours').select('*').order('day_of_week', { ascending: true })
       ]);
       setData({ 
         sections: s.data || [], 
@@ -80,11 +81,22 @@ const Admin = () => {
         team: tm.data || [],
         prices: p.data || [],
         bookings: b.data || [],
-        blockedTimes: bt.data || []
+        blockedTimes: bt.data || [],
+        workingHours: wh.data || []
       });
     };
     load();
   }, [refresh]);
+
+  // --- WORKING HOURS OPERATIONS ---
+  const updateWorkingHour = async (whId, updates) => {
+    const { error } = await supabase.from('working_hours').update(updates).eq('id', whId);
+    if (error) {
+      alert('Hiba a beosztás frissítésekor!');
+    } else {
+      triggerRefresh();
+    }
+  };
 
   // --- BOOKING OPERATIONS ---
   const updateBookingStatus = async (id, newStatus, email, name) => {
@@ -103,41 +115,46 @@ const Admin = () => {
     }
   };
 
-  const addBlock = async () => {
-    if (!newBlock.date) return alert("A dátum megadása kötelező!");
-    
-    // Check conflicts
-    const dateStr = newBlock.date;
+  const initiateBlock = async (isFullDay, startTimeStr = null, endTimeStr = null, reasonStr = '') => {
+    const dateStr = format(selectedBlockDate, 'yyyy-MM-dd');
     const activeBookings = data.bookings.filter(b => b.status === 'pending' || b.status === 'approved');
+    
+    // Ütközés vizsgálat
     const conflicts = activeBookings.filter(b => {
       const bDate = new Date(b.booking_datetime);
       if (format(bDate, 'yyyy-MM-dd') !== dateStr) return false;
-      if (newBlock.isFullDay) return true;
+      if (isFullDay) return true;
       
       const bTime = format(bDate, 'HH:mm');
-      return bTime >= newBlock.startTime && bTime < newBlock.endTime;
+      return bTime >= startTimeStr && bTime < endTimeStr;
     });
 
     if (conflicts.length > 0) {
       setConflictingBookings(conflicts);
       setPendingBlockAction({
-        block_date: newBlock.date,
-        start_time: newBlock.isFullDay ? null : newBlock.startTime || null,
-        end_time: newBlock.isFullDay ? null : newBlock.endTime || null,
-        is_full_day: newBlock.isFullDay,
-        reason: newBlock.reason
+        block_date: dateStr,
+        start_time: isFullDay ? null : startTimeStr,
+        end_time: isFullDay ? null : endTimeStr,
+        is_full_day: isFullDay,
+        reason: reasonStr
       });
       setConflictModalOpen(true);
       return;
     }
 
     await executeBlockInsert({
-      block_date: newBlock.date,
-      start_time: newBlock.isFullDay ? null : newBlock.startTime || null,
-      end_time: newBlock.isFullDay ? null : newBlock.endTime || null,
-      is_full_day: newBlock.isFullDay,
-      reason: newBlock.reason
+      block_date: dateStr,
+      start_time: isFullDay ? null : startTimeStr,
+      end_time: isFullDay ? null : endTimeStr,
+      is_full_day: isFullDay,
+      reason: reasonStr
     });
+  };
+
+  const addBlock = async () => {
+    // Ez a régi gomb logikája (ha még használnánk, de lecseréljük)
+    if (!newBlock.date) return alert("A dátum megadása kötelező!");
+    await initiateBlock(newBlock.isFullDay, newBlock.startTime, newBlock.endTime, newBlock.reason);
   };
 
   const executeBlockInsert = async (blockData) => {
@@ -188,12 +205,22 @@ const Admin = () => {
       format(new Date(b.booking_datetime), 'yyyy-MM-dd') === dateStr
     );
 
-    return { dayBlocks, dayBookings };
+    // Beosztás (is it an active day?)
+    const dayOfWeek = date.getDay();
+    const daySchedule = data.workingHours.find(w => w.day_of_week === dayOfWeek);
+    const isActiveDay = daySchedule ? daySchedule.is_active : false;
+
+    return { dayBlocks, dayBookings, daySchedule, isActiveDay };
   };
 
   const adminTileContent = ({ date, view }) => {
-    if (view !== 'month' || isWeekend(date)) return null;
-    const { dayBlocks, dayBookings } = getDayAvailability(date);
+    if (view !== 'month') return null;
+    
+    const { dayBlocks, dayBookings, isActiveDay } = getDayAvailability(date);
+    
+    // Ha nem munkanap a beosztás szerint (pl. hétvége vagy kikapcsolt szerda), szürke
+    if (!isActiveDay) return null;
+
     const hasFullBlock = dayBlocks.some(b => b.is_full_day);
 
     if (hasFullBlock) {
@@ -203,9 +230,17 @@ const Admin = () => {
     return (
       <div className="flex gap-1 mt-1 justify-center">
         {dayBlocks.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-orange-400" title="Részleges letiltás"></div>}
-        {dayBookings.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" title="Létező foglalás"></div>}
+        {dayBookings.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-green-500" title="Létező foglalás"></div>}
       </div>
     );
+  };
+
+  const adminTileDisabled = ({ date, view }) => {
+    if (view === 'month') {
+      const { isActiveDay } = getDayAvailability(date);
+      if (!isActiveDay) return true; // Szürke, ha nincs rendelés
+    }
+    return false;
   };
 
   const triggerRefresh = () => setRefresh(p => p + 1);
@@ -535,6 +570,7 @@ const Admin = () => {
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
           <TabButton id="responses" label="Űrlapok" icon={Users} />
           <TabButton id="bookings" label="Konzultációk" icon={CalendarIcon} />
+          <TabButton id="working_hours" label="Beosztás" icon={Clock} />
           <TabButton id="blocked" label="Naptár Letiltások" icon={Ban} />
           
           <div className="ml-auto p-2 flex items-center gap-4">
@@ -1252,7 +1288,56 @@ const Admin = () => {
             </div>
           )}
 
-          {/* BLOCKED TIMES */}
+          {/* WORKING HOURS (BEOSZTÁS) MANAGEMENT */}
+          {activeTab === 'working_hours' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-dark mb-4 border-b pb-2">Heti Alap Beosztás (Mikor lehet foglalni)</h2>
+              <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm grid gap-4">
+                {data.workingHours.length === 0 && <p className="text-gray-500">Nincs még feltöltött beosztás az adatbázisban.</p>}
+                {data.workingHours.map((wh) => {
+                  const daysMap = {1: 'Hétfő', 2: 'Kedd', 3: 'Szerda', 4: 'Csütörtök', 5: 'Péntek', 6: 'Szombat', 0: 'Vasárnap'};
+                  return (
+                    <div key={wh.id} className={`p-4 rounded-[6px] border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${wh.is_active ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200 opacity-70'}`}>
+                      <div className="flex items-center gap-4 w-full md:w-auto">
+                        <label className="flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={wh.is_active} 
+                            onChange={(e) => updateWorkingHour(wh.id, { is_active: e.target.checked })}
+                            className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300"
+                          />
+                          <span className={`ml-3 font-bold text-lg ${wh.is_active ? 'text-blue-900' : 'text-gray-500'}`}>{daysMap[wh.day_of_week]}</span>
+                        </label>
+                      </div>
+
+                      {wh.is_active ? (
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                          <span className="text-sm font-medium text-gray-600">Mettől:</span>
+                          <input 
+                            type="time" 
+                            value={wh.start_time?.substring(0,5) || ''} 
+                            onChange={(e) => updateWorkingHour(wh.id, { start_time: e.target.value })}
+                            className="border border-gray-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-sm font-medium text-gray-600 ml-2">Meddig:</span>
+                          <input 
+                            type="time" 
+                            value={wh.end_time?.substring(0,5) || ''} 
+                            onChange={(e) => updateWorkingHour(wh.id, { end_time: e.target.value })}
+                            className="border border-gray-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-500 italic">Ezen a napon nincs rendelés.</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* BLOCKED TIMES (INTERACTIVE CALENDAR) */}
           {activeTab === 'blocked' && (
             <div className="space-y-8">
               
@@ -1260,137 +1345,118 @@ const Admin = () => {
                 
                 {/* CALENDAR VIEW */}
                 <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm flex flex-col items-center">
-                  <h4 className="font-bold text-dark text-lg mb-4 self-start w-full border-b pb-2">Naptár áttekintés</h4>
+                  <h4 className="font-bold text-dark text-lg mb-4 self-start w-full border-b pb-2 flex items-center gap-2"><CalendarIcon size={20} /> Válassz napot</h4>
                   <Calendar 
                     onChange={handleAdminDateChange} 
                     value={selectedBlockDate}
                     locale="hu-HU"
                     tileContent={adminTileContent}
+                    tileDisabled={adminTileDisabled}
                     className="border-none shadow-sm rounded-lg p-2 w-full admin-calendar"
                   />
-                  <div className="flex gap-4 mt-6 text-sm text-gray-600 justify-center w-full">
-                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div> Egész nap letiltva</span>
-                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-orange-400"></div> Részleges letiltás</span>
-                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div> Van foglalás</span>
+                  <div className="flex flex-wrap gap-4 mt-6 text-sm text-gray-600 justify-center w-full">
+                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div> Letiltott</span>
+                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500"></div> Foglalt</span>
+                    <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-gray-200"></div> Inaktív / Múltbeli</span>
                   </div>
                 </div>
 
-                {/* ADD BLOCK FORM */}
-                <div className="bg-red-50 p-6 rounded-[8px] border border-red-100 flex flex-col h-full">
-                  <h4 className="font-bold text-red-900 text-lg mb-4 flex items-center gap-2 border-b border-red-200 pb-2">
-                    <Ban size={20} /> Letiltás hozzáadása erre a napra: 
-                    <span className="bg-red-800 text-white px-2 py-1 rounded text-sm">{format(selectedBlockDate, 'yyyy. MM. dd.', { locale: hu })}</span>
+                {/* DAY DETAILS & TIMESLOTS */}
+                <div className="bg-gray-50 p-6 rounded-[8px] border border-gray-200 flex flex-col h-full">
+                  <h4 className="font-bold text-dark text-lg mb-4 flex items-center justify-between border-b border-gray-300 pb-2">
+                    <span>A kiválasztott nap: <span className="text-primary">{format(selectedBlockDate, 'yyyy. MM. dd.', { locale: hu })}</span></span>
                   </h4>
                   
-                  {/* Status of the selected day */}
                   {(() => {
-                     const { dayBlocks, dayBookings } = getDayAvailability(selectedBlockDate);
-                     return (
-                       <div className="mb-6 bg-white p-4 rounded border border-red-100 text-sm">
-                         <h5 className="font-bold text-gray-700 mb-2">A nap státusza:</h5>
-                         {dayBookings.length > 0 ? (
-                           <ul className="list-disc pl-4 text-blue-700 space-y-1 mb-2">
-                             {dayBookings.map(b => (
-                               <li key={b.id}>
-                                 Foglalás: <b>{new Date(b.booking_datetime).toLocaleTimeString('hu-HU', {hour: '2-digit', minute:'2-digit'})}</b> ({b.first_name} {b.last_name})
-                               </li>
-                             ))}
-                           </ul>
-                         ) : <p className="text-gray-500 italic mb-2">Nincs aktív foglalás erre a napra.</p>}
-
-                         {dayBlocks.length > 0 ? (
-                           <ul className="list-disc pl-4 text-orange-700 space-y-1">
-                             {dayBlocks.map(b => (
-                               <li key={b.id}>
-                                 Letiltva: <b>{b.is_full_day ? 'Egész nap' : `${b.start_time?.substring(0,5)} - ${b.end_time?.substring(0,5)}`}</b> {b.reason && `(${b.reason})`}
-                               </li>
-                             ))}
-                           </ul>
-                         ) : <p className="text-gray-500 italic">Nincs érvényes letiltás erre a napra.</p>}
-                       </div>
-                     );
-                  })()}
-
-                  <div className="grid grid-cols-1 gap-4 flex-grow">
-                    <div className="flex items-center">
-                      <label className="flex items-center gap-2 cursor-pointer text-red-900 font-medium bg-red-100/50 p-3 rounded-md w-full border border-red-200">
-                        <input 
-                          type="checkbox" 
-                          checked={newBlock.isFullDay}
-                          onChange={(e) => setNewBlock({...newBlock, isFullDay: e.target.checked, startTime: '', endTime: ''})}
-                          className="w-5 h-5 text-red-600 focus:ring-red-500 rounded border-gray-300"
-                        />
-                        A teljes nap letiltása
-                      </label>
-                    </div>
-
-                    {!newBlock.isFullDay && (
-                      <div className="flex gap-4">
-                        <div className="flex-1">
-                          <label className="block text-sm font-medium text-red-800 mb-1">Kezdő (pl. 13:00)</label>
-                          <input 
-                            type="time" 
-                            value={newBlock.startTime}
-                            onChange={(e) => setNewBlock({...newBlock, startTime: e.target.value})}
-                            className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none bg-white"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <label className="block text-sm font-medium text-red-800 mb-1">Záró (pl. 16:00)</label>
-                          <input 
-                            type="time" 
-                            value={newBlock.endTime}
-                            onChange={(e) => setNewBlock({...newBlock, endTime: e.target.value})}
-                            className="w-full border border-red-200 rounded-[4px] px-4 py-2 outline-none bg-white"
-                          />
-                        </div>
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-sm font-medium text-red-800 mb-1">Megjegyzés (Opcionális - csak te látod)</label>
-                      <input 
-                        type="text" 
-                        placeholder="Szabadság, orvos, stb..." 
-                        value={newBlock.reason}
-                        onChange={(e) => setNewBlock({...newBlock, reason: e.target.value})}
-                        className="w-full border border-red-200 rounded-[4px] px-4 py-2 focus:ring-2 focus:ring-red-500 outline-none bg-white"
-                      />
-                    </div>
+                    const { dayBlocks, dayBookings, daySchedule, isActiveDay } = getDayAvailability(selectedBlockDate);
                     
-                    <div className="flex justify-end items-end mt-auto pt-4">
-                       <button 
-                         onClick={addBlock} 
-                         className="bg-red-600 text-white px-6 py-3 rounded-[6px] hover:bg-red-700 transition shadow-md flex items-center gap-2 font-bold w-full justify-center"
-                       >
-                         <Ban size={18} /> Letiltás mentése
-                       </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                    if (!isActiveDay || !daySchedule) {
+                      return <div className="p-4 bg-gray-100 text-gray-500 rounded border border-gray-200 text-center mt-4">Ezen a napon alapértelmezetten nincs rendelés a Beosztás alapján.</div>;
+                    }
 
-              {/* LIST OF BLOCKS */}
-              <div className="bg-white p-6 rounded-[8px] border border-gray-200 shadow-sm">
-                <h3 className="text-xl font-bold mb-4 text-dark border-b pb-2">Összes aktív letiltás listája</h3>
-                <div className="grid gap-3">
-                  {data.blockedTimes.map(bt => (
-                    <div key={bt.id} className="bg-gray-50 border border-gray-200 rounded-[6px] p-4 flex justify-between items-center hover:bg-gray-100 transition">
-                      <div>
-                        <div className="font-bold text-lg text-dark flex items-center gap-2">
-                          <CalendarIcon size={18} className="text-red-500" />
-                          {bt.block_date} 
-                          {bt.is_full_day ? (
-                            <span className="text-white text-xs font-bold bg-red-500 px-2 py-1 rounded ml-2 uppercase">Egész nap</span>
+                    const isFullDayBlocked = dayBlocks.find(b => b.is_full_day);
+
+                    // Idősávok generálása a schedule alapján
+                    let possibleTimes = [];
+                    if (daySchedule.start_time && daySchedule.end_time) {
+                      const startHour = parseInt(daySchedule.start_time.split(':')[0], 10);
+                      const endHour = parseInt(daySchedule.end_time.split(':')[0], 10); 
+                      for (let i = startHour; i < endHour; i++) {
+                        possibleTimes.push(`${i.toString().padStart(2, '0')}:00`);
+                      }
+                    }
+
+                    return (
+                      <div className="flex flex-col gap-4 flex-grow">
+                        {/* Egész napos letiltás gomb */}
+                        {isFullDayBlocked ? (
+                          <div className="bg-red-100 border border-red-300 p-4 rounded text-center">
+                            <p className="text-red-800 font-bold mb-2">A nap jelenleg teljesen le van tiltva.</p>
+                            <button onClick={() => deleteItem('blocked_times', isFullDayBlocked.id)} className="bg-white text-red-600 border border-red-600 px-4 py-2 rounded hover:bg-red-50 transition text-sm font-bold">
+                              Letiltás feloldása
+                            </button>
+                          </div>
+                        ) : (
+                          <button onClick={() => initiateBlock(true)} className="w-full bg-red-100 text-red-700 hover:bg-red-200 py-3 rounded-[6px] transition font-bold border border-red-200 flex justify-center items-center gap-2">
+                            <Ban size={18} /> A teljes nap letiltása
+                          </button>
+                        )}
+
+                        <div className="mt-2 text-gray-500 text-sm border-b pb-1 font-medium">Elérhető idősávok a beosztás szerint:</div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 overflow-y-auto max-h-[350px] pr-2">
+                          {isFullDayBlocked ? (
+                            <p className="col-span-full text-gray-400 italic text-sm text-center py-4">Mivel az egész nap le van tiltva, az idősávok nem kattinthatók.</p>
                           ) : (
-                            <span className="text-gray-700 font-bold bg-gray-200 px-2 py-1 rounded ml-2">{bt.start_time?.substring(0,5)} - {bt.end_time?.substring(0,5)}</span>
+                            possibleTimes.map(timeStr => {
+                              const hour = parseInt(timeStr.split(':')[0], 10);
+                              const nextHour = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                              const timeRange = `${timeStr} - ${nextHour}`;
+                              
+                              // Megnézzük van-e foglalás
+                              const booking = dayBookings.find(b => format(new Date(b.booking_datetime), 'HH:mm') === timeStr);
+                              
+                              // Megnézzük le van-e tiltva külön
+                              const block = dayBlocks.find(b => !b.is_full_day && b.start_time?.substring(0,5) === timeStr);
+
+                              if (booking) {
+                                return (
+                                  <div key={timeStr} className="bg-green-100 border border-green-300 rounded p-3 flex flex-col justify-between cursor-pointer hover:bg-green-200 transition" onClick={() => {
+                                    if(confirm(`Szeretnéd letiltani ezt az időpontot, és ezáltal ELUTASÍTANI a foglalást (${booking.first_name} ${booking.last_name})?`)) {
+                                      initiateBlock(false, timeStr, nextHour, "Automatikus ütközés");
+                                    }
+                                  }}>
+                                    <span className="font-bold text-green-900">{timeRange}</span>
+                                    <span className="text-sm text-green-800 font-medium truncate">👤 {booking.first_name} {booking.last_name}</span>
+                                  </div>
+                                );
+                              }
+
+                              if (block) {
+                                return (
+                                  <div key={timeStr} className="bg-gray-100 border border-gray-300 rounded p-3 flex flex-col justify-center items-center cursor-pointer hover:bg-gray-200 transition relative overflow-hidden" onClick={() => deleteItem('blocked_times', block.id)}>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20 text-red-500">
+                                      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="4" /></svg>
+                                    </div>
+                                    <span className="font-bold text-gray-500 line-through">{timeRange}</span>
+                                    <span className="text-xs text-red-500 font-bold mt-1 uppercase">Feloldás</span>
+                                  </div>
+                                );
+                              }
+
+                              // Ha szabad
+                              return (
+                                <div key={timeStr} className="bg-white border border-gray-300 rounded p-3 flex flex-col justify-center items-center cursor-pointer hover:border-red-500 hover:text-red-600 transition group" onClick={() => initiateBlock(false, timeStr, nextHour)}>
+                                  <span className="font-bold text-dark group-hover:text-red-600 transition">{timeRange}</span>
+                                  <span className="text-xs text-gray-400 group-hover:text-red-500 mt-1">Letiltás</span>
+                                </div>
+                              );
+                            })
                           )}
                         </div>
-                        {bt.reason && <p className="text-gray-500 text-sm mt-1">{bt.reason}</p>}
                       </div>
-                      <button onClick={() => deleteItem('blocked_times', bt.id)} className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-[4px] transition bg-white shadow-sm border"><Trash2 size={18}/></button>
-                    </div>
-                  ))}
-                  {data.blockedTimes.length === 0 && <p className="text-gray-500 italic text-center py-4">Nincsenek beállítva letiltások.</p>}
+                    );
+                  })()}
                 </div>
               </div>
 

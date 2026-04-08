@@ -84,7 +84,7 @@ const Application = () => {
         keywords="tréning jelentkezés, konzultáció kérése, kapcsolatfelvétel, időpontfoglalás"
       />
       {/* Container with fade-in-up animation */}
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden mt-5 border border-gray-100 animate-fade-in-up">
+      <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden mt-10 border border-gray-100 animate-fade-in-up">
         <div className="bg-primary p-8 text-center">
           <h2 className="text-3xl font-serif font-bold text-white">Jelentkezés és Kapcsolatfelvétel</h2>
           <p className="text-white/90 mt-2 font-light">Csatlakozz a következő vezetői tréninghez!</p>

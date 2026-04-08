@@ -27,30 +27,31 @@ const Jelentkezes = () => {
   
   const [bookedDates, setBookedDates] = useState([]);
   const [blockedTimes, setBlockedTimes] = useState([]);
+  const [workingHours, setWorkingHours] = useState([]);
 
-  // Adatok lekérése a Supabase-ből (foglalt időpontok, letiltott napok)
+  // Adatok lekérése a Supabase-ből (foglalt időpontok, letiltott napok, heti beosztás)
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        // Lekérjük a függőben lévő vagy elfogadott foglalásokat a jövőben
-        const { data: bookings, error: bookingsErr } = await supabase
-          .from('consultation_bookings')
-          .select('booking_datetime')
-          .in('status', ['pending', 'approved'])
-          .gte('booking_datetime', new Date().toISOString());
-          
-        if (bookingsErr) throw bookingsErr;
+        const [bookingsRes, blockedRes, workingHoursRes] = await Promise.all([
+          supabase.from('consultation_bookings')
+            .select('booking_datetime')
+            .in('status', ['pending', 'approved'])
+            .gte('booking_datetime', new Date().toISOString()),
+          supabase.from('blocked_times')
+            .select('*')
+            .gte('block_date', new Date().toISOString().split('T')[0]),
+          supabase.from('working_hours')
+            .select('*')
+        ]);
 
-        // Lekérjük a letiltott időpontokat
-        const { data: blocked, error: blockedErr } = await supabase
-          .from('blocked_times')
-          .select('*')
-          .gte('block_date', new Date().toISOString().split('T')[0]);
+        if (bookingsRes.error) throw bookingsRes.error;
+        if (blockedRes.error) throw blockedRes.error;
+        if (workingHoursRes.error) throw workingHoursRes.error;
 
-        if (blockedErr) throw blockedErr;
-
-        setBookedDates(bookings || []);
-        setBlockedTimes(blocked || []);
+        setBookedDates(bookingsRes.data || []);
+        setBlockedTimes(blockedRes.data || []);
+        setWorkingHours(workingHoursRes.data || []);
       } catch (err) {
         console.error("Hiba a naptár adatok lekérésekor:", err);
       }
@@ -62,16 +63,17 @@ const Jelentkezes = () => {
     const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday...
     let possibleTimes = [];
 
-    // Alap szabályok napok szerint
-    if (dayOfWeek === 1 || dayOfWeek === 2) {
-      // Hétfő, Kedd: 08:00 - 12:00
-      possibleTimes = ['08:00', '09:00', '10:00', '11:00'];
-    } else if (dayOfWeek === 4) {
-      // Csütörtök: 17:00 - 20:00
-      possibleTimes = ['17:00', '18:00', '19:00'];
-    } else if (dayOfWeek === 5) {
-      // Péntek: 08:00 - 16:00
-      possibleTimes = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
+    // Dinamikus heti beosztás lekérése az adott napra
+    const daySchedule = workingHours.find(w => w.day_of_week === dayOfWeek);
+    
+    if (daySchedule && daySchedule.is_active && daySchedule.start_time && daySchedule.end_time) {
+      const startHour = parseInt(daySchedule.start_time.split(':')[0], 10);
+      // Az end_time-nál az utolsó lehetséges sáv kezdete az end_time előtti óra (pl. 20:00-nál az utolsó sáv 19:00)
+      const endHour = parseInt(daySchedule.end_time.split(':')[0], 10); 
+      
+      for (let i = startHour; i < endHour; i++) {
+        possibleTimes.push(`${i.toString().padStart(2, '0')}:00`);
+      }
     }
 
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -170,19 +172,25 @@ const Jelentkezes = () => {
 
   const tileDisabled = ({ date, view }) => {
     if (view === 'month') {
-      // Hétvégék tiltása
-      if (isWeekend(date)) return true;
-      
       // Múltbeli dátumok tiltása
       if (startOfDay(date) < startOfDay(new Date())) return true;
+
+      // Nap tiltása, ha az adatbázis szerint nincs beosztás (is_active = false)
+      const dayOfWeek = date.getDay();
+      const daySchedule = workingHours.find(w => w.day_of_week === dayOfWeek);
+      if (daySchedule && !daySchedule.is_active) return true;
+      
+      // Fallback: Ha még nem jött le a workingHours, tiltjuk a hétvégét (ne villogjon hibásan)
+      if (workingHours.length === 0 && isWeekend(date)) return true;
 
       // Egész napos admin letiltások
       const dateStr = format(date, 'yyyy-MM-dd');
       const isFullDayBlocked = blockedTimes.some(b => b.block_date === dateStr && b.is_full_day);
       if (isFullDayBlocked) return true;
 
-      // Ha aznapra egyetlen elérhető időpont sincs (se szabály alapján, se a foglalások miatt)
+      // Ha aznapra egyetlen elérhető időpont sincs a foglalások/részleges tiltások miatt
       const available = getTimesForDate(date);
+      // Extra védelem, ha elméletileg aktív nap, de nincs egyetlen legenerálható óra se (pl hibás DB beállítás)
       if (available.length === 0) return true;
     }
     return false;
