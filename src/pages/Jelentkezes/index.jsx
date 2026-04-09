@@ -223,9 +223,12 @@ const Jelentkezes = () => {
                 Jelentkezem a konzultációra
               </button>
             </div>
-            <div className="hidden md:block bg-red-900/40 rounded-2xl h-80 w-full flex items-center justify-center border-4 border-red-700/50 shadow-2xl relative overflow-hidden">
-              {/* IMAGE PLACEHOLDER (Vágyott állapot) */}
-              <span className="text-red-300 font-medium">Kép helye: A vágyott állapot, szabadság</span>
+            <div className="hidden md:flex justify-center items-center w-full relative">
+              <img 
+                src="/elso.png" 
+                alt="A vágyott állapot, szabadság" 
+                className="w-full max-w-[400px] h-auto object-contain rounded-2xl shadow-2xl border-4 border-red-700/50"
+              />
             </div>
           </div>
         </div>
@@ -239,9 +242,12 @@ const Jelentkezes = () => {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="bg-gray-100 rounded-2xl h-96 w-full flex items-center justify-center border border-gray-200 shadow-inner relative overflow-hidden">
-              {/* IMAGE PLACEHOLDER (Stresszes vezető) */}
-              <span className="text-gray-400 font-medium px-6 text-center">Kép helye: A stresszes vezető (pl. vasárnapi ebéd közben is a munkára gondol)</span>
+            <div className="flex justify-center items-center w-full">
+              <img 
+                src="/masodik.png" 
+                alt="A stresszes vezető" 
+                className="w-full max-w-[400px] h-auto object-contain rounded-2xl shadow-xl border border-gray-200"
+              />
             </div>
             
             <div className="space-y-6">
@@ -562,14 +568,14 @@ const Jelentkezes = () => {
             </div>
             
             <div className="w-full md:w-1/3 flex-shrink-0 flex justify-center">
-              <div className="w-64 h-64 md:w-80 md:h-80 rounded-full border-8 border-white shadow-xl overflow-hidden bg-gray-200">
+              <div className="w-full max-w-[320px] rounded-2xl border-8 border-white shadow-xl overflow-hidden bg-gray-100">
                 <img 
                   src="/Polonyi_Tünde.jpg" 
                   alt="Dr. Polonyi Tünde" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto object-contain"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-400 text-center px-4 bg-gray-200">A /Polonyi_Tünde.jpg fájl nem található a public mappában.</div>';
+                    e.target.parentElement.innerHTML = '<div class="w-full h-96 flex items-center justify-center text-gray-400 text-center px-4 bg-gray-200">A /Polonyi_Tünde.jpg fájl nem található a public mappában.</div>';
                   }}
                 />
               </div>
