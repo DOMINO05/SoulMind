@@ -209,7 +209,7 @@ const Jelentkezes = () => {
       <section className="bg-gray-50 py-16 md:py-24 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
+            <div className="space-y-6 order-2 md:order-1 text-center md:text-left">
               <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-dark">
                 Miért csúszik ki a kezedből a vezetői szerep, miközben pontosan érzed, hogy több van benned?
               </h1>
@@ -223,11 +223,11 @@ const Jelentkezes = () => {
                 Jelentkezem a konzultációra
               </button>
             </div>
-            <div className="hidden md:flex justify-center items-center w-full relative">
+            <div className="flex justify-center items-center w-full relative order-1 md:order-2 mb-8 md:mb-0">
               <img 
                 src="/elso.png" 
                 alt="A vágyott állapot, szabadság" 
-                className="w-full max-w-[400px] h-auto object-contain rounded-2xl shadow-xl"
+                className="w-full max-w-[320px] md:max-w-[400px] h-auto object-contain rounded-2xl shadow-xl"
               />
             </div>
           </div>
