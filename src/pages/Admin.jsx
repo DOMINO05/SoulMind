@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban, AlertTriangle, Clock } from 'lucide-react';
+import { Trash2, Plus, Upload, Image as ImageIcon, FileText, Users, Edit2, Check, X, Phone, Mail, MessageSquare, Book, Link as LinkIcon, LogOut, User, DollarSign, ArrowUp, ArrowDown, Layout, Calendar as CalendarIcon, Ban, AlertTriangle, Clock, MessageCircle } from 'lucide-react';
 import ContactLink from '../components/ContactLink';
 import { useAuth } from '../context/AuthContext';
 import Calendar from 'react-calendar';
@@ -12,7 +12,7 @@ const Admin = () => {
   const { signOut, user } = useAuth();
   const [activeTab, setActiveTab] = useState('responses');
   const [contentSubTab, setContentSubTab] = useState('services'); // 'services' or 'home'
-  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [], bookings: [], blockedTimes: [], workingHours: [] });
+  const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [], bookings: [], blockedTimes: [], workingHours: [], reviews: [] });
   const [refresh, setRefresh] = useState(0);
   
   const [uploading, setUploading] = useState(false);
@@ -61,7 +61,7 @@ const Admin = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [s, i, t, r, v, tm, p, b, bt, wh] = await Promise.all([
+      const [s, i, t, r, v, tm, p, b, bt, wh, rev] = await Promise.all([
         supabase.from('sections').select('*').order('sort_order', { ascending: true }),
         supabase.from('section_items').select('*').order('id', { ascending: true }),
         supabase.from('trainings').select('*').order('created_at', { ascending: false }),
@@ -71,7 +71,8 @@ const Admin = () => {
         supabase.from('prices').select('*').order('sort_order', { ascending: true }),
         supabase.from('consultation_bookings').select('*').order('booking_datetime', { ascending: false }),
         supabase.from('blocked_times').select('*').order('block_date', { ascending: false }),
-        supabase.from('working_hours').select('*').order('day_of_week', { ascending: true })
+        supabase.from('working_hours').select('*').order('day_of_week', { ascending: true }),
+        supabase.from('reviews').select('*').order('created_at', { ascending: false })
       ]);
       setData({ 
         sections: s.data || [], 
@@ -83,11 +84,34 @@ const Admin = () => {
         prices: p.data || [],
         bookings: b.data || [],
         blockedTimes: bt.data || [],
-        workingHours: wh.data || []
+        workingHours: wh.data || [],
+        reviews: rev.data || []
       });
     };
     load();
   }, [refresh]);
+
+  // --- REVIEW IMAGE UPLOAD ---
+  const handleReviewUpload = async (e) => {
+    try {
+      const file = e.target.files[0];
+      if (!file) return;
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `reviews/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+      await supabase.from('reviews').insert({ image_path: publicUrl, alt_text: file.name });
+      triggerRefresh();
+    } catch (error) {
+      console.error('Upload error:', error);
+      setGeneralAlertMsg('Hiba történt a vélemény feltöltésekor.');
+    } finally {
+      setUploading(false);
+      e.target.value = null;
+    }
+  };
 
   // --- WORKING HOURS OPERATIONS ---
   const updateWorkingHour = async (whId, updates) => {
@@ -572,6 +596,7 @@ const Admin = () => {
           <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="team" label="Munkatársak" icon={User} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
+          <TabButton id="reviews" label="Vélemények" icon={MessageCircle} />
           <TabButton id="bookings" label="Konzultációk" icon={CalendarIcon} />
           <TabButton id="working_hours" label="Beosztás" icon={Clock} />
           <TabButton id="blocked" label="Naptár Letiltások" icon={Ban} />
@@ -1026,7 +1051,7 @@ const Admin = () => {
               <div className="mb-8 flex flex-col sm:flex-row justify-between items-center bg-blue-50 p-6 rounded-[8px] border border-blue-100 gap-4">
                 <div className="text-center sm:text-left">
                   <h4 className="font-bold text-blue-900 text-lg">Galéria kezelése</h4>
-                  <p className="text-sm text-blue-700">Itt tölthetsz fel képeket a Tréningek szekcióba.</p>
+                  <p className="text-sm text-blue-700">Itt tölthetsz fel képeket a Főoldali Tréningek szekcióba.</p>
                 </div>
                 <label className={`cursor-pointer bg-blue-600 text-white px-6 py-3 rounded-[6px] hover:bg-blue-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg font-medium w-full sm:w-auto justify-center active:scale-95 ${uploading ? 'opacity-70' : ''}`}>
                   <Upload size={18} />
@@ -1048,7 +1073,41 @@ const Admin = () => {
                     <button onClick={() => deleteItem('trainings', t.id)} className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-[4px] shadow opacity-100 md:opacity-0 group-hover:opacity-100 transition hover:bg-red-600 active:scale-90"><Trash2 size={16}/></button>
                   </div>
                 ))}
+                {data.trainings.length === 0 && <p className="col-span-full text-center text-gray-500 py-8">Még nincs feltöltött kép a galériában.</p>}
               </div>
+            </div>
+          )}
+
+          {/* REVIEWS (ÜGYFÉLVÉLEMÉNYEK) */}
+          {activeTab === 'reviews' && (
+            <div>
+              <div className="mb-8 flex flex-col sm:flex-row justify-between items-center bg-indigo-50 p-6 rounded-[8px] border border-indigo-100 gap-4">
+                <div className="text-center sm:text-left">
+                  <h4 className="font-bold text-indigo-900 text-lg">Ügyfélvélemények (Képek)</h4>
+                  <p className="text-sm text-indigo-700">Tölts fel képernyőfotókat az elégedett ügyfelek véleményeiről, amelyek a <b className="font-bold">/jelentkezes</b> oldalon jelennek meg.</p>
+                </div>
+                <label className={`cursor-pointer bg-indigo-600 text-white px-6 py-3 rounded-[6px] hover:bg-indigo-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg font-medium w-full sm:w-auto justify-center active:scale-95 ${uploading ? 'opacity-70' : ''}`}>
+                  <Upload size={18} />
+                  {uploading ? 'Feltöltés...' : 'Új vélemény feltöltése'}
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleReviewUpload} 
+                    disabled={uploading} 
+                  />
+                </label>
+              </div>
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+                {data.reviews.map(rev => (
+                  <div key={rev.id} className="relative group rounded-[8px] overflow-hidden bg-gray-100 shadow-sm border border-gray-200 hover:shadow-lg transition-all break-inside-avoid">
+                    <img src={rev.image_path} className="w-full h-auto object-contain" alt="Ügyfélvélemény" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none"></div>
+                    <button onClick={() => deleteItem('reviews', rev.id)} className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-[4px] shadow opacity-100 md:opacity-0 group-hover:opacity-100 transition hover:bg-red-600 active:scale-90"><Trash2 size={16}/></button>
+                  </div>
+                ))}
+              </div>
+              {data.reviews.length === 0 && <p className="text-center text-gray-500 py-8">Még nincsenek feltöltött ügyfélvélemény képek.</p>}
             </div>
           )}
 

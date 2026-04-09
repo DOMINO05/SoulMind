@@ -29,12 +29,13 @@ const Jelentkezes = () => {
   const [bookedDates, setBookedDates] = useState([]);
   const [blockedTimes, setBlockedTimes] = useState([]);
   const [workingHours, setWorkingHours] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
-  // Adatok lekérése a Supabase-ből (foglalt időpontok, letiltott napok, heti beosztás)
+  // Adatok lekérése a Supabase-ből (foglalt időpontok, letiltott napok, heti beosztás, vélemények)
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const [bookingsRes, blockedRes, workingHoursRes] = await Promise.all([
+        const [bookingsRes, blockedRes, workingHoursRes, reviewsRes] = await Promise.all([
           supabase.from('consultation_bookings')
             .select('booking_datetime')
             .in('status', ['pending', 'approved'])
@@ -43,18 +44,23 @@ const Jelentkezes = () => {
             .select('*')
             .gte('block_date', new Date().toISOString().split('T')[0]),
           supabase.from('working_hours')
+            .select('*'),
+          supabase.from('reviews')
             .select('*')
+            .order('created_at', { ascending: false })
         ]);
 
         if (bookingsRes.error) throw bookingsRes.error;
         if (blockedRes.error) throw blockedRes.error;
         if (workingHoursRes.error) throw workingHoursRes.error;
+        if (reviewsRes.error) throw reviewsRes.error;
 
         setBookedDates(bookingsRes.data || []);
         setBlockedTimes(blockedRes.data || []);
         setWorkingHours(workingHoursRes.data || []);
+        setReviews(reviewsRes.data || []);
       } catch (err) {
-        console.error("Hiba a naptár adatok lekérésekor:", err);
+        console.error("Hiba a naptár vagy vélemény adatok lekérésekor:", err);
       }
     };
     fetchAvailability();
@@ -584,6 +590,30 @@ const Jelentkezes = () => {
           </div>
         </div>
       </section>
+
+      {/* REVIEWS SECTION (Only visible if there are review images uploaded) */}
+      {reviews && reviews.length > 0 && (
+        <section className="py-20 bg-gray-100 border-t border-gray-200">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-dark mb-16">
+              Ügyfélvélemények
+            </h2>
+            
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="break-inside-avoid shadow-lg rounded-2xl overflow-hidden border border-gray-200 bg-white">
+                  <img 
+                    src={rev.image_path} 
+                    alt={rev.alt_text || "Ügyfélvélemény"} 
+                    className="w-full h-auto object-contain pointer-events-none"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 7. FINAL CTA SECTION */}
       <section className="py-24 bg-gray-100 text-center">
