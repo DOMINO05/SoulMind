@@ -107,12 +107,7 @@ const Admin = () => {
     } else {
       triggerRefresh();
       
-      // Ha elutasítjuk, nyissunk meg egy mailto linket
-      if (newStatus === 'rejected') {
-        const subject = encodeURIComponent("Vezetői Konzultáció - Időpont egyeztetés");
-        const body = encodeURIComponent(`Kedves ${name}!\n\nKöszönöm a jelentkezésedet a vezetői konzultációra. Sajnos a választott időpontban nem tudjuk megtartani a beszélgetést.\n\nKérlek, egyeztessünk egy új időpontot, vagy jelezd felém a megfelelő alternatívákat.\n\nÜdvözlettel,\nDr. Polonyi Tünde`);
-        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-      }
+      // Megjegyzés: Jelenleg nincs automatikus mailto nyitás az elutasításkor a felhasználói kérés alapján.
     }
   };
 
@@ -180,12 +175,6 @@ const Admin = () => {
     // Elutasítjuk a konfliktusos foglalásokat
     for (const b of conflictingBookings) {
        await supabase.from('consultation_bookings').update({ status: 'rejected' }).eq('id', b.id);
-       
-       // Itt automatikusan nyithatnánk a mailto linkeket is, de ha sok van, megzavarhatja a böngészőt.
-       // Esetleg utólag manuálisan intézheti, vagy itt dobunk fel egyet
-       const subject = encodeURIComponent("Vezetői Konzultáció - Időpont változás");
-       const body = encodeURIComponent(`Kedves ${b.first_name}!\n\nA választott időpontban (${new Date(b.booking_datetime).toLocaleString('hu-HU')}) sajnos nem tudjuk megtartani a beszélgetést. Kérlek egyeztessünk új időpontot!\n\nÜdv,\nDr. Polonyi Tünde`);
-       window.open(`mailto:${b.email}?subject=${subject}&body=${body}`, '_blank');
     }
     
     // Utána beszúrjuk magát a letiltást
@@ -583,7 +572,6 @@ const Admin = () => {
           <TabButton id="volumes" label="Kötetek" icon={Book} />
           <TabButton id="team" label="Munkatársak" icon={User} />
           <TabButton id="trainings" label="Galéria" icon={ImageIcon} />
-          <TabButton id="responses" label="Űrlapok" icon={Users} />
           <TabButton id="bookings" label="Konzultációk" icon={CalendarIcon} />
           <TabButton id="working_hours" label="Beosztás" icon={Clock} />
           <TabButton id="blocked" label="Naptár Letiltások" icon={Ban} />
@@ -1064,76 +1052,6 @@ const Admin = () => {
             </div>
           )}
 
-          {/* RESPONSES */}
-          {activeTab === 'responses' && (
-            <div>
-              {/* Desktop View */}
-              <div className="hidden md:block overflow-x-auto rounded-[8px] border border-gray-200">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider font-semibold border-b border-gray-200">
-                      <th className="p-4 min-w-[150px]">Név</th>
-                      <th className="p-4 min-w-[200px]">Email</th>
-                      <th className="p-4 min-w-[120px]">Telefon</th>
-                      <th className="p-4 w-full">Üzenet</th>
-                      <th className="p-4 text-right min-w-[100px]">Művelet</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 bg-white">
-                    {data.responses.map(r => (
-                      <tr key={r.id} className="hover:bg-gray-50 transition">
-                        <td className="p-4 font-medium text-dark align-top whitespace-normal break-words">{r.full_name}</td>
-                        <td className="p-4 text-gray-600 align-top whitespace-normal break-all">
-                          <ContactLink value={r.email} type="email" className="hover:text-primary hover:underline" />
-                        </td>
-                        <td className="p-4 text-gray-600 font-mono text-sm align-top whitespace-nowrap">
-                          <ContactLink value={r.phone} type="phone" className="hover:text-primary hover:underline" />
-                        </td>
-                        <td className="p-4 text-gray-600 align-top whitespace-pre-wrap break-words">{r.interests}</td>
-                        <td className="p-4 text-right align-top">
-                          <button onClick={() => deleteItem('questionnaire', r.id)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-[4px] transition"><Trash2 size={18}/></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Mobile View */}
-              <div className="md:hidden flex flex-col gap-4">
-                {data.responses.map(r => (
-                  <div key={r.id} className="bg-white border border-gray-200 rounded-[8px] p-4 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-dark text-lg break-words">{r.full_name}</h3>
-                      <button onClick={() => deleteItem('questionnaire', r.id)} className="text-red-500 p-1 bg-red-50 rounded-[4px] active:bg-red-100"><Trash2 size={16}/></button>
-                    </div>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-2 break-all">
-                        <Mail size={14} className="text-primary shrink-0"/> 
-                        <ContactLink value={r.email} type="email" className="hover:underline hover:text-primary" />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone size={14} className="text-primary shrink-0"/> 
-                        <ContactLink value={r.phone} type="phone" className="hover:underline hover:text-primary" />
-                      </div>
-                      <div className="flex items-start gap-2 bg-gray-50 p-3 rounded-[6px] mt-2 border border-gray-100">
-                        <MessageSquare size={14} className="text-primary mt-1 shrink-0"/> 
-                        <span className="italic whitespace-pre-wrap break-words">{r.interests || "Nincs üzenet"}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {data.responses.length === 0 && (
-                <div className="text-center py-12 text-gray-400 animate-pulse">
-                  <Users size={48} className="mx-auto mb-2 opacity-20" />
-                  <p>Még nem érkezett jelentkezés.</p>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* BOOKINGS */}
           {activeTab === 'bookings' && (
             <div className="space-y-6">
@@ -1196,9 +1114,6 @@ const Admin = () => {
                                 <button onClick={() => updateBookingStatus(b.id, 'approved', b.email, b.first_name)} className="bg-green-500 text-white px-4 py-2 rounded-[4px] hover:bg-green-600 transition flex items-center gap-1 font-medium text-sm"><Check size={16}/> Elfogad</button>
                                 <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-red-500 text-white px-4 py-2 rounded-[4px] hover:bg-red-600 transition flex items-center gap-1 font-medium text-sm"><X size={16}/> Elutasít</button>
                               </>
-                            )}
-                            {b.status === 'rejected' && (
-                              <button onClick={() => updateBookingStatus(b.id, 'rejected', b.email, b.first_name)} className="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-[4px] hover:bg-blue-100 transition flex items-center gap-1 font-medium text-sm"><Mail size={16}/> Új email (Sablon)</button>
                             )}
                             <button onClick={() => deleteItem('consultation_bookings', b.id)} className="bg-gray-100 text-gray-600 p-2 rounded-[4px] hover:bg-red-50 hover:text-red-600 transition"><Trash2 size={18}/></button>
                           </div>
@@ -1326,24 +1241,47 @@ const Admin = () => {
                       </div>
 
                       {wh.is_active ? (
-                        <div className="flex items-center gap-2 w-full md:w-auto">
-                          <span className="text-sm font-medium text-gray-600">Mettől:</span>
-                          <input 
-                            type="time" 
-                            value={wh.start_time?.substring(0,5) || ''} 
-                            onChange={(e) => updateWorkingHour(wh.id, { start_time: e.target.value })}
-                            className="border border-gray-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <span className="text-sm font-medium text-gray-600 ml-2">Meddig:</span>
-                          <input 
-                            type="time" 
-                            value={wh.end_time?.substring(0,5) || ''} 
-                            onChange={(e) => updateWorkingHour(wh.id, { end_time: e.target.value })}
-                            className="border border-gray-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
-                          />
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-600 w-14">Mettől:</span>
+                            <input 
+                              type="number" 
+                              min="0"
+                              max="23"
+                              step="1"
+                              placeholder="08"
+                              value={wh.start_time ? parseInt(wh.start_time.split(':')[0], 10) : ''} 
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if(val === '') return updateWorkingHour(wh.id, { start_time: null });
+                                updateWorkingHour(wh.id, { start_time: `${val.toString().padStart(2, '0')}:00` });
+                              }}
+                              className="border border-gray-300 rounded px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-20 text-center font-mono"
+                            />
+                            <span className="text-sm text-gray-500">:00</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-600 w-14 sm:w-auto">Meddig:</span>
+                            <input 
+                              type="number" 
+                              min="0"
+                              max="24"
+                              step="1"
+                              placeholder="16"
+                              value={wh.end_time ? parseInt(wh.end_time.split(':')[0], 10) : ''} 
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if(val === '') return updateWorkingHour(wh.id, { end_time: null });
+                                updateWorkingHour(wh.id, { end_time: `${val.toString().padStart(2, '0')}:00` });
+                              }}
+                              className="border border-gray-300 rounded px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 w-20 text-center font-mono"
+                            />
+                            <span className="text-sm text-gray-500">:00</span>
+                          </div>
                         </div>
                       ) : (
-                        <div className="text-sm text-gray-500 italic">Ezen a napon nincs rendelés.</div>
+                        <div className="text-sm text-gray-500 italic mt-2 sm:mt-0">Ezen a napon nincs rendelés.</div>
                       )}
                     </div>
                   );
@@ -1492,7 +1430,7 @@ const Admin = () => {
                        <h2 className="text-xl font-bold text-gray-900">Figyelem! Ütköző foglalások</h2>
                      </div>
                      <p className="text-gray-600 mb-4">
-                       A letiltani kívánt időpontban / napon a következő <b>aktív foglalások</b> találhatók. Ha megerősíted a letiltást, a rendszer ezeket a foglalásokat automatikusan <strong className="text-red-600">Elutasított</strong> státuszra állítja, és megnyílik a levelező egy elutasító sablonnal.
+                       A letiltani kívánt időpontban / napon a következő <b>aktív foglalások</b> találhatók. Ha megerősíted a letiltást, a rendszer ezeket a foglalásokat automatikusan <strong className="text-red-600">Elutasított</strong> státuszra állítja.
                      </p>
                      
                      <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6 max-h-60 overflow-y-auto">
