@@ -206,19 +206,19 @@ const Jelentkezes = () => {
     <div className="min-h-screen bg-gray-50 pt-20">
       
       {/* 1. HERO SECTION */}
-      <section className="bg-red-800 text-white py-16 md:py-24">
+      <section className="bg-gray-50 py-16 md:py-24 border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <h1 className="text-3xl md:text-5xl font-extrabold leading-tight">
+              <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-dark">
                 Miért csúszik ki a kezedből a vezetői szerep, miközben pontosan érzed, hogy több van benned?
               </h1>
-              <p className="text-lg md:text-xl opacity-90 leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
                 Ha vezetőként (vagy vezetővé válás előtt) folyamatos nyomás alatt működsz, és közben nehéz megtartani a határokat, a fókuszt és az egyensúlyt, az nem véletlen. Az előzetes díjmentes konzultáción segítünk ránézni arra, hol csúszik el most a működésed – és hogyan tudsz valóban stabil, szabad vezetővé válni a munkában és a magánéletben is.
               </p>
               <button 
                 onClick={scrollToForm}
-                className="inline-block bg-white text-red-900 font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-xl hover:bg-gray-100 hover:scale-105 transition-transform duration-300"
+                className="inline-block bg-red-800 text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300"
               >
                 Jelentkezem a konzultációra
               </button>
@@ -227,7 +227,7 @@ const Jelentkezes = () => {
               <img 
                 src="/elso.png" 
                 alt="A vágyott állapot, szabadság" 
-                className="w-full max-w-[400px] h-auto object-contain rounded-2xl shadow-2xl border-4 border-red-700/50"
+                className="w-full max-w-[400px] h-auto object-contain rounded-2xl shadow-xl"
               />
             </div>
           </div>
@@ -539,7 +539,7 @@ const Jelentkezes = () => {
           <div className="mt-16 text-center">
             <button 
               onClick={scrollToForm}
-              className="inline-block bg-red-600 text-white font-bold text-lg py-4 px-8 rounded-full shadow-lg hover:bg-red-700 hover:scale-105 transition-transform duration-300"
+              className="inline-block bg-red-800 text-white font-bold text-lg py-4 px-8 rounded-full shadow-lg hover:bg-red-700 hover:scale-105 transition-transform duration-300"
             >
               Jelentkezem a konzultációra
             </button>
