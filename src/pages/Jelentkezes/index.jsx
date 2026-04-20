@@ -216,17 +216,29 @@ const Jelentkezes = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             
-            {/* MOBILON CÍM FELÜL */}
-            <div className="order-1 md:order-1 text-center md:text-left space-y-6 w-full">
+            {/* SZÖVEGÉSZ (Cím + Szöveg + Gomb) */}
+            <div className="order-1 md:order-1 text-center md:text-left flex flex-col justify-center space-y-6 w-full">
               <h1 className="text-3xl md:text-5xl font-extrabold leading-[1.3] md:leading-[1.2] text-dark tracking-normal">
                 Szeretnél olyan vezető lenni, aki nem csak irányít, hanem a saját életét is kézben tartja?
               </h1>
+              
+              {/* Asztali alcím */}
               <p className="hidden md:block text-lg md:text-xl text-gray-600 leading-relaxed md:leading-loose">
                 Ha vezetőként - vagy vezetővé válás előtt - folyamatos nyomás alatt működsz, és közben nehéz megtartani a határokat, a fókuszt és az egyensúlyt, az nem véletlen. Az előzetes díjmentes konzultáción segítünk ránézni arra, hol csúszik el most a működésed.
               </p>
+              
+              {/* Asztali Gomb */}
+              <div className="hidden md:block pt-4">
+                <button 
+                  onClick={scrollToForm}
+                  className="inline-block bg-red-800 text-white font-bold text-xl py-4 px-10 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300"
+                >
+                  Jelentkezem
+                </button>
+              </div>
             </div>
             
-            {/* KÉP (mobilon második) */}
+            {/* KÉP (mobilon második, asztalon a jobb oldalon) */}
             <div className="order-2 md:order-2 flex justify-center items-center w-full relative mb-4 md:mb-0">
               <img 
                 src="/elso.png" 
@@ -235,24 +247,14 @@ const Jelentkezes = () => {
               />
             </div>
 
-            {/* SZÖVEG MARADÉKA ÉS GOMB MOBILON */}
-            <div className="order-3 md:hidden text-center space-y-6 w-full">
+            {/* MOBIL EXTRA: Szöveg és gomb a kép alatt */}
+            <div className="order-3 md:hidden text-center flex flex-col items-center space-y-6 w-full">
               <p className="text-lg text-gray-600 leading-relaxed">
                 Ha vezetőként - vagy vezetővé válás előtt - folyamatos nyomás alatt működsz, és közben nehéz megtartani a határokat, a fókuszt és az egyensúlyt, az nem véletlen. Az előzetes díjmentes konzultáción segítünk ránézni arra, hol csúszik el most a működésed.
               </p>
               <button 
                 onClick={scrollToForm}
-                className="inline-block bg-red-800 text-white font-bold text-lg py-4 px-8 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300 w-full max-w-[300px] mx-auto"
-              >
-                Jelentkezem
-              </button>
-            </div>
-
-            {/* GOMB ASZTALON */}
-            <div className="hidden md:block md:col-span-2 text-left mt-2">
-              <button 
-                onClick={scrollToForm}
-                className="inline-block bg-red-800 text-white font-bold text-xl py-4 px-10 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300"
+                className="inline-block bg-red-800 text-white font-bold text-lg py-4 px-8 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300 w-full max-w-[300px]"
               >
                 Jelentkezem
               </button>
