@@ -209,32 +209,53 @@ const Jelentkezes = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-[#faf8f5] pt-20">
       
       {/* 1. HERO SECTION */}
-      <section className="bg-gray-50 py-16 md:py-24 border-b border-gray-200">
+      <section className="bg-[#faf8f5] py-16 md:py-24 border-b border-[#eebf63]/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 order-2 md:order-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-dark">
-                Miért csúszik ki a kezedből a vezetői szerep, miközben pontosan érzed, hogy több van benned?
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            
+            {/* MOBILON CÍM FELÜL */}
+            <div className="order-1 md:order-1 text-center md:text-left space-y-6 w-full">
+              <h1 className="text-3xl md:text-5xl font-extrabold leading-[1.3] md:leading-[1.2] text-dark tracking-normal">
+                Szeretnél olyan vezető lenni, aki nem csak irányít, hanem a saját életét is kézben tartja?
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-                Ha vezetőként (vagy vezetővé válás előtt) folyamatos nyomás alatt működsz, és közben nehéz megtartani a határokat, a fókuszt és az egyensúlyt, az nem véletlen. Az előzetes díjmentes konzultáción segítünk ránézni arra, hol csúszik el most a működésed – és hogyan tudsz valóban stabil, szabad vezetővé válni a munkában és a magánéletben is.
+              <p className="hidden md:block text-lg md:text-xl text-gray-600 leading-relaxed md:leading-loose">
+                Ha vezetőként - vagy vezetővé válás előtt - folyamatos nyomás alatt működsz, és közben nehéz megtartani a határokat, a fókuszt és az egyensúlyt, az nem véletlen. Az előzetes díjmentes konzultáción segítünk ránézni arra, hol csúszik el most a működésed.
               </p>
-              <button 
-                onClick={scrollToForm}
-                className="inline-block bg-red-800 text-white font-bold text-lg md:text-xl py-4 px-8 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300"
-              >
-                Jelentkezem a konzultációra
-              </button>
             </div>
-            <div className="flex justify-center items-center w-full relative order-1 md:order-2 mb-8 md:mb-0">
+            
+            {/* KÉP (mobilon második) */}
+            <div className="order-2 md:order-2 flex justify-center items-center w-full relative mb-4 md:mb-0">
               <img 
                 src="/elso.png" 
                 alt="A vágyott állapot, szabadság" 
-                className="w-full max-w-[320px] md:max-w-[400px] h-auto object-contain rounded-2xl shadow-xl"
+                className="w-full max-w-[320px] md:max-w-[400px] h-auto object-contain rounded-2xl shadow-2xl shadow-[#eebf63]/20"
               />
+            </div>
+
+            {/* SZÖVEG MARADÉKA ÉS GOMB MOBILON */}
+            <div className="order-3 md:hidden text-center space-y-6 w-full">
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Ha vezetőként - vagy vezetővé válás előtt - folyamatos nyomás alatt működsz, és közben nehéz megtartani a határokat, a fókuszt és az egyensúlyt, az nem véletlen. Az előzetes díjmentes konzultáción segítünk ránézni arra, hol csúszik el most a működésed.
+              </p>
+              <button 
+                onClick={scrollToForm}
+                className="inline-block bg-red-800 text-white font-bold text-lg py-4 px-8 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300 w-full max-w-[300px] mx-auto"
+              >
+                Jelentkezem
+              </button>
+            </div>
+
+            {/* GOMB ASZTALON */}
+            <div className="hidden md:block md:col-span-2 text-left mt-2">
+              <button 
+                onClick={scrollToForm}
+                className="inline-block bg-red-800 text-white font-bold text-xl py-4 px-10 rounded-full shadow-lg hover:bg-red-900 hover:scale-105 transition-all duration-300"
+              >
+                Jelentkezem
+              </button>
             </div>
           </div>
         </div>
@@ -243,49 +264,56 @@ const Jelentkezes = () => {
       {/* 2. PAIN POINTS SECTION */}
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-dark mb-16 max-w-3xl mx-auto">
-            Ismerős, hogy állandó rajtad a nyomás, a felelősség és közben egyre kevesebb szabadságod marad a saját életedben?
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="flex justify-center items-center w-full">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            
+            {/* Cím (Mindig legfelül) */}
+            <div className="md:col-span-2 text-center mb-8 md:mb-16">
+              <h2 className="text-3xl md:text-[2.5rem] font-bold text-dark leading-tight tracking-normal max-w-4xl mx-auto relative inline-block">
+                <span className="relative z-10">Ismerős, hogy állandó rajtad a nyomás, a felelősség és közben egyre kevesebb szabadságod marad a saját életedben?</span>
+                <span className="absolute bottom-1 left-0 w-full h-4 bg-[#eebf63]/30 -z-10 rounded-full blur-sm"></span>
+              </h2>
+            </div>
+            
+            {/* Kép mobilon második */}
+            <div className="order-2 md:order-1 flex justify-center items-center w-full">
               <img 
                 src="/masodik.png" 
                 alt="A stresszes vezető" 
-                className="w-full max-w-[400px] h-auto object-contain rounded-2xl shadow-xl border border-gray-200"
+                className="w-full max-w-[320px] md:max-w-[400px] h-auto object-contain rounded-2xl shadow-xl shadow-[#eebf63]/10"
               />
             </div>
             
-            <div className="space-y-6">
+            {/* Felsorolás mobilon harmadik */}
+            <div className="order-3 md:order-2 space-y-6 bg-[#faf8f5] p-6 md:p-8 rounded-2xl border border-[#eebf63]/20 shadow-sm">
               <ul className="space-y-6">
                 <li className="flex items-start gap-4">
                   <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    <strong className="text-dark">Sokszor inkább te oldasz meg mindent</strong>, mert nehéz kiadni a feladatokat a kezedből (vezetőként vagy egyre több felelősséget vállalva érzed, hogy rajtad áll vagy bukik minden).
+                    <strong className="text-dark">Sokszor inkább te oldasz meg mindent</strong>, mert nehéz kiadni a feladatokat a kezedből.
                   </p>
                 </li>
                 <li className="flex items-start gap-4">
                   <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    <strong className="text-dark">Kommunikációs helyzetekben</strong> utólag már pontosan tudod, mit kellett volna mondani (egy megbeszélés vagy nehéz beszélgetés után még sokáig visszapörgeted a mondatokat).
+                    <strong className="text-dark">Kommunikációs helyzetekben</strong> - egy megbeszélés vagy nehéz beszélgetés után - még sokáig visszapörgeted a mondatokat.
                   </p>
                 </li>
                 <li className="flex items-start gap-4">
                   <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    <strong className="text-dark">Stresszhelyzetben kapkodsz</strong> vagy épp lefagysz, és nem tudsz tisztán reagálni (gyors döntéseknél bizonytalan vagy, vagy halogatod őket).
+                    <strong className="text-dark">Stresszhelyzetben kapkodsz</strong> vagy épp lefagysz, és nem tudsz tisztán reagálni.
                   </p>
                 </li>
                 <li className="flex items-start gap-4">
                   <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    <strong className="text-dark">Folyamatos nyomás alatt működsz</strong>, és szinte nincs valódi leállás (akkor is a feladatokon jár az agyad, amikor már pihennél).
+                    <strong className="text-dark">Folyamatos nyomás alatt működsz</strong>, és szinte nincs valódi leállás.
                   </p>
                 </li>
                 <li className="flex items-start gap-4">
                   <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
                   <p className="text-gray-700 text-lg leading-relaxed">
-                    <strong className="text-dark">Az egyensúly felborul:</strong> A munka és a magánélet között egyre inkább felborul az egyensúly (a feltöltődés háttérbe szorul, miközben nő benned a feszültség).
+                    <strong className="text-dark">A munka-magánélet egyensúly felborul:</strong> akkor is a feladatokon jár az agyad, amikor már pihennél.
                   </p>
                 </li>
               </ul>
@@ -295,48 +323,49 @@ const Jelentkezes = () => {
       </section>
 
       {/* 3. SOLUTION / DESIRED STATE SECTION */}
-      <section className="py-20 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-dark mb-12">
-            Képzeld el, hogy már nem az az ember vagy, akit a feladatok és a felelősség irányítanak
+      <section className="py-24 bg-[#faf8f5]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-[2.5rem] font-bold text-center text-dark mb-14 leading-tight tracking-normal relative inline-block w-full">
+            Képzeld el, hogy már nem az az ember vagy, akit csak a feladatok és a felelősség irányítanak
+            <div className="w-24 h-1 bg-[#eebf63] mx-auto mt-6 rounded-full"></div>
           </h2>
           
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border border-gray-100">
+          <div className="bg-white rounded-3xl shadow-xl shadow-[#eebf63]/10 p-8 md:p-12 border border-[#eebf63]/20">
             <ul className="space-y-6">
               <li className="flex items-start gap-4">
                 <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0 mt-1" />
                 <p className="text-gray-700 text-lg leading-relaxed">
-                  <strong className="text-dark">Nem te tartasz össze mindent görcsösen</strong>, hanem egy olyan vezető vagy, aki rendszert épít és nem roskad alatta (nem rajtad múlik minden apró részlet).
+                  Egy olyan vezető vagy, aki rendszert épít és nem roskad össze alatta.
                 </p>
               </li>
               <li className="flex items-start gap-4">
                 <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0 mt-1" />
                 <p className="text-gray-700 text-lg leading-relaxed">
-                  <strong className="text-dark">Nem bizonytalanodsz el</strong> helyzetekben, hanem kimondod, amit kell, amikor kell (nem utólag rakod össze, mit kellett volna mondani).
+                  Kimondod, amit kell, amikor kell (pl. nehéz döntés esetén nem halogatsz).
                 </p>
               </li>
               <li className="flex items-start gap-4">
                 <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0 mt-1" />
                 <p className="text-gray-700 text-lg leading-relaxed">
-                  <strong className="text-dark">Nem visz el a nyomás</strong>, hanem kifejezetten jól működsz benne (nem kapkodsz, hanem irányítasz).
+                  Kifejezetten jól működsz nyomás alatt (pl. egy fontos megbeszélésen laza vagy és céltudatos).
                 </p>
               </li>
               <li className="flex items-start gap-4">
                 <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0 mt-1" />
                 <p className="text-gray-700 text-lg leading-relaxed">
-                  <strong className="text-dark">Nem csúsznak szét a határaid</strong>, mert természetes számodra, hogy megtartod őket (nem alkalmazkodsz túl, és nem égsz ki közben).
+                  Természetes számodra, hogy megtartod a határaid (pl. családi nyaraláson el tudod engedni a munkát).
                 </p>
               </li>
               <li className="flex items-start gap-4">
                 <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0 mt-1" />
                 <p className="text-gray-700 text-lg leading-relaxed">
-                  <strong className="text-dark">Nem a túlélésről szól a napod</strong>, hanem arról, hogy kézben tartod, amit csinálsz (nem sodródsz a feladatokkal).
+                  Kézben tartod, amit csinálsz (nyugodtan indul a napod és nyugodtan alszol el).
                 </p>
               </li>
               <li className="flex items-start gap-4">
                 <CheckCircle2 className="w-7 h-7 text-green-500 flex-shrink-0 mt-1" />
                 <p className="text-gray-700 text-lg leading-relaxed">
-                  <strong className="text-dark">Egy olyan emberré válsz, aki egyszerre vezet és él</strong> (nem kell feláldoznod a saját életed ahhoz, hogy helytállj).
+                  Egy olyan emberré válsz, aki egyszerre vezet és él.
                 </p>
               </li>
             </ul>
@@ -350,10 +379,10 @@ const Jelentkezes = () => {
           
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-dark mb-4">
-              Jelentkezz az ingyenes konzultációra
+              Jelentkezz a vezetői konzultációra (díjmentes)
             </h2>
             <p className="text-xl text-gray-600">
-              Legyél egy olyan vezető, aki nem csak irányít, hanem a saját életét is kézben tartja.
+              Legyél egy olyan vezető, aki határozottan reagál nehéz helyzetekben
             </p>
           </div>
 
@@ -376,10 +405,10 @@ const Jelentkezes = () => {
                   <p className="text-sm text-gray-500 mt-1">A részleteket és a megerősítést emailben fogod megkapni.</p>
                 </div>
               </div>
-              <div className="mt-6 text-sm text-center text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 font-medium">
+              <div className="mt-6 text-[15px] leading-relaxed text-center text-gray-700 bg-[#fffdf0] p-5 rounded-xl border border-[#eebf63]/40 font-medium shadow-inner">
                 * A jelentkezőket szűrjük, ezért kérlek egyértelműen fogalmazz az űrlapon. A beszélgetésen ránézünk a jelenlegi helyzetedre, és megmutatjuk, milyen irányba tudsz elindulni.
                 <br/><br/>
-                <strong>FONTOS:</strong> Csak akkor jelentkezz, ha ténylegesen szeretnél fejlődni vezetőként, elkötelezett vagy és rászánod az időt.
+                <span className="text-dark font-bold underline decoration-[#eebf63] decoration-2 underline-offset-4">FONTOS:</span> Csak akkor jelentkezz, ha ténylegesen szeretnél fejlődni, elkötelezett vagy és rászánod az időt.
               </div>
             </div>
 
@@ -512,33 +541,38 @@ const Jelentkezes = () => {
       </section>
 
       {/* 5. BENEFITS SECTION */}
-      <section className="py-20 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-dark text-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-900 via-[#eebf63] to-red-900 opacity-50"></div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-[2.5rem] font-bold mb-6 leading-tight tracking-normal text-white">
               Nem a nyomás irányít, hanem képes leszel stabilan reagálni a helyzetekben
             </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Hogyan tudsz határozottan működni anélkül, hogy közben kimerülnél?
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto font-light">
+              Hogyan tudsz valóban stabil, szabad vezetővé válni a munkában anélkül, hogy közben kimerülnél?
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-red-500 transition-colors">
-              <h3 className="text-xl font-bold text-white mb-3">Tiszta vezetői működés</h3>
-              <p className="text-gray-400">Átláthatóbbá válik, hogyan kommunikálsz, döntesz és vezetsz a mindennapokban.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 hover:border-[#eebf63]/70 hover:shadow-lg hover:shadow-[#eebf63]/10 transition-all duration-300 group">
+              <div className="w-12 h-1 bg-[#eebf63] mb-6 rounded-full group-hover:w-16 transition-all duration-300"></div>
+              <h3 className="text-xl font-bold text-white mb-3 tracking-wide">Tiszta vezetői működés</h3>
+              <p className="text-gray-400 leading-relaxed">Átláthatóbbá válik, hogyan kommunikálsz, döntesz és vezetsz a mindennapokban.</p>
             </div>
-            <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-red-500 transition-colors">
-              <h3 className="text-xl font-bold text-white mb-3">Határozott keretek</h3>
-              <p className="text-gray-400">Megtanulod megtartani a határaidat anélkül, hogy folyamatos belső feszültséget éreznél.</p>
+            <div className="bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 hover:border-[#eebf63]/70 hover:shadow-lg hover:shadow-[#eebf63]/10 transition-all duration-300 group">
+              <div className="w-12 h-1 bg-[#eebf63] mb-6 rounded-full group-hover:w-16 transition-all duration-300"></div>
+              <h3 className="text-xl font-bold text-white mb-3 tracking-wide">Határozott keretek</h3>
+              <p className="text-gray-400 leading-relaxed">Megtanulod megtartani a határaidat anélkül, hogy folyamatos belső feszültséget éreznél.</p>
             </div>
-            <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-red-500 transition-colors">
-              <h3 className="text-xl font-bold text-white mb-3">Delegálás</h3>
-              <p className="text-gray-400">Nem mindent egyedül viszel és oldasz meg, így végre felszabadul a kapacitásod.</p>
+            <div className="bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 hover:border-[#eebf63]/70 hover:shadow-lg hover:shadow-[#eebf63]/10 transition-all duration-300 group">
+              <div className="w-12 h-1 bg-[#eebf63] mb-6 rounded-full group-hover:w-16 transition-all duration-300"></div>
+              <h3 className="text-xl font-bold text-white mb-3 tracking-wide">Delegálás</h3>
+              <p className="text-gray-400 leading-relaxed">Nem mindent egyedül viszel és oldasz meg, így végre felszabadul a kapacitásod.</p>
             </div>
-            <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-red-500 transition-colors">
-              <h3 className="text-xl font-bold text-white mb-3">Egyensúly</h3>
-              <p className="text-gray-400">A vezetői szereped stabilizálása mellett a saját magánéleted is visszakerül a helyére.</p>
+            <div className="bg-gray-800/80 backdrop-blur-sm p-8 rounded-2xl border border-gray-700 hover:border-[#eebf63]/70 hover:shadow-lg hover:shadow-[#eebf63]/10 transition-all duration-300 group">
+              <div className="w-12 h-1 bg-[#eebf63] mb-6 rounded-full group-hover:w-16 transition-all duration-300"></div>
+              <h3 className="text-xl font-bold text-white mb-3 tracking-wide">Egyensúly</h3>
+              <p className="text-gray-400 leading-relaxed">A vezetői szereped stabilizálása mellett a saját magánéleted is visszakerül a helyére.</p>
             </div>
           </div>
           
@@ -554,36 +588,41 @@ const Jelentkezes = () => {
       </section>
 
       {/* 6. ABOUT (RÓLAM) SECTION */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-[#faf8f5]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gray-50 rounded-3xl p-8 md:p-12 border border-gray-200 shadow-sm flex flex-col md:flex-row gap-12 items-center">
+          
+          <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 border border-[#eebf63]/20 shadow-2xl shadow-[#eebf63]/5 flex flex-col md:flex-row gap-12 md:gap-20 items-center">
             
-            <div className="flex-1 space-y-6">
-              <h2 className="text-3xl md:text-4xl font-bold text-dark mb-6 border-b-4 border-red-800 pb-4 inline-block">Dr. Polonyi Tünde</h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Olyan gyakorlati eszközöket adok át, amelyek növelik a vezetői hatékonyságot, fejlesztik a kommunikációt és az együttműködést, valamint támogatják a stresszkezelést és a rezilienciát.
-              </p>
-              <p className="text-lg text-gray-700 leading-relaxed font-medium">
-                Célom, hogy pszichológusként segítsek megoldani a legnehezebb vezetői kihívásokat. A leghatékonyabb fegyverem az a tudás, amely lehetővé teszi a kiégés megelőzését és a mentális jóllét fejlesztését.
-              </p>
-              <div className="bg-white p-6 rounded-xl border-l-4 border-red-800 shadow-sm mt-8">
-                <p className="text-gray-800 italic">
-                  "Szakmai hitvallásom, hogy a jó vezető önmagát ismeri a legjobban – és e tudást tudatosan használja saját csapata emberséges, lendületes és eredményes támogatására."
-                </p>
-              </div>
-            </div>
-            
-            <div className="w-full md:w-1/3 flex-shrink-0 flex justify-center">
-              <div className="w-full max-w-[320px] rounded-2xl border-8 border-white shadow-xl overflow-hidden bg-gray-100">
+            {/* KÉP és NÉV JOBB OLDALON (mobilon első lesz) */}
+            <div className="w-full md:w-[40%] flex-shrink-0 flex flex-col items-center order-1 md:order-2">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-dark mb-6 tracking-normal text-center w-full">Dr. Polonyi Tünde</h2>
+              <div className="w-full max-w-[340px] rounded-3xl border-8 border-[#faf8f5] shadow-xl overflow-hidden bg-white">
                 <img 
                   src="/Polonyi_Tünde.jpg" 
                   alt="Dr. Polonyi Tünde" 
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto object-contain hover:scale-105 transition-transform duration-700"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.parentElement.innerHTML = '<div class="w-full h-96 flex items-center justify-center text-gray-400 text-center px-4 bg-gray-200">A /Polonyi_Tünde.jpg fájl nem található a public mappában.</div>';
+                    e.target.parentElement.innerHTML = '<div class="w-full h-96 flex items-center justify-center text-gray-400 text-center px-4 bg-gray-100 font-medium">A /Polonyi_Tünde.jpg fájl nem található.</div>';
                   }}
                 />
+              </div>
+            </div>
+
+            {/* SZÖVEG BAL OLDALON (mobilon második lesz) */}
+            <div className="flex-1 space-y-8 order-2 md:order-1 pt-4 md:pt-16">
+              <p className="text-lg md:text-xl text-gray-700 leading-loose">
+                Olyan gyakorlati eszközöket adok át, amelyek növelik a vezetői hatékonyságot, fejlesztik a kommunikációt és az együttműködést, valamint támogatják a stresszkezelést és a rezilienciát.
+              </p>
+              <p className="text-lg md:text-xl text-dark font-medium leading-loose">
+                Célom, hogy pszichológusként segítsek megoldani a legnehezebb vezetői kihívásokat. A leghatékonyabb fegyverem az a tudás, amely lehetővé teszi a kiégés megelőzését és a mentális jóllét fejlesztését.
+              </p>
+              
+              <div className="bg-[#fffdf0] p-8 rounded-2xl border-l-4 border-[#eebf63] shadow-sm relative mt-10">
+                <span className="absolute -top-6 -left-2 text-6xl text-[#eebf63] opacity-30 font-serif">"</span>
+                <p className="text-lg md:text-xl text-gray-800 italic leading-relaxed font-serif relative z-10">
+                  Szakmai hitvallásom, hogy a jó vezető önmagát ismeri a legjobban – és e tudást tudatosan használja saját csapata emberséges, lendületes és eredményes támogatására.
+                </p>
               </div>
             </div>
             
@@ -593,10 +632,11 @@ const Jelentkezes = () => {
 
       {/* REVIEWS SECTION (Only visible if there are review images uploaded) */}
       {reviews && reviews.length > 0 && (
-        <section className="py-20 bg-gray-100 border-t border-gray-200">
+        <section className="py-24 bg-white border-t border-[#eebf63]/20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-dark mb-16">
+            <h2 className="text-3xl md:text-[2.5rem] font-bold text-center text-dark mb-16 leading-tight tracking-normal relative inline-block w-full">
               Ügyfélvélemények
+              <div className="w-16 h-1 bg-[#eebf63] mx-auto mt-6 rounded-full"></div>
             </h2>
             
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
@@ -616,16 +656,16 @@ const Jelentkezes = () => {
       )}
 
       {/* 7. FINAL CTA SECTION */}
-      <section className="py-24 bg-gray-100 text-center">
+      <section className="py-24 md:py-32 bg-[#faf8f5] text-center border-t border-gray-200">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-dark mb-8 leading-tight">
-            Jelentkezz a konzultációra, hogy egy olyan vezetővé válj, aki nem csak irányít, hanem szabadon is él közben.
+          <h2 className="text-3xl md:text-5xl font-extrabold text-dark mb-10 leading-[1.3] tracking-normal">
+            Jelentkezz a vezetői konzultációra
           </h2>
           <button 
             onClick={scrollToForm}
             className="inline-block bg-red-800 text-white font-bold text-xl md:text-2xl py-5 px-10 rounded-full shadow-2xl hover:bg-red-900 hover:scale-105 transition-all duration-300"
           >
-            Jelentkezem a konzultációra
+            Jelentkezem
           </button>
         </div>
       </section>
