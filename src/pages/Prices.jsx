@@ -38,9 +38,9 @@ const Prices = () => {
            <div className="p-8 md:p-12">
              <div className="space-y-6">
                {prices.map((price) => (
-                 <div key={price.id} className="flex flex-col md:flex-row justify-between items-center p-4 hover:bg-warm-light/30 rounded-lg transition-colors border-b border-gray-100 last:border-0">
-                   <h3 className="text-lg md:text-xl font-medium text-gray-800 text-center md:text-left">{price.name}</h3>
-                   <span className="text-xl md:text-2xl font-bold text-primary mt-2 md:mt-0 whitespace-nowrap">{price.price}</span>
+                 <div key={price.id} className="flex flex-col items-center justify-center p-6 hover:bg-warm-light/30 rounded-lg transition-colors border-b border-gray-100 last:border-0 gap-3 text-center">
+                   <h3 className="text-xl md:text-2xl font-medium text-gray-800">{price.name}</h3>
+                   <span className="text-2xl md:text-3xl font-bold text-primary whitespace-pre-wrap">{price.price}</span>
                  </div>
                ))}
                {prices.length === 0 && <p className="text-gray-500 italic">Jelenleg nincsenek feltöltött árak.</p>}
