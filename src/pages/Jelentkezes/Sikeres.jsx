@@ -17,7 +17,7 @@ const SikeresJelentkezes = () => {
         
         <div className="text-lg text-gray-600 mb-8 space-y-4">
           <p>Köszönjük a jelentkezésedet. Hamarosan egy automatikus visszaigazoló emailt fogsz kapni tőlünk.</p>
-          <p>A jelentkezésed jelenleg <span className="font-semibold text-yellow-600">elbírálás alatt áll</span>.</p>
+          <p>A jelentkezésed jelenleg <span className="font-semibold text-yellow-600">jóváhagyásra vár</span>.</p>
           <p>Amint elfogadásra kerül az időpontod, küldeni fogjuk a részleteket és a megbeszélés linkjét a megadott email címedre.</p>
         </div>
 
