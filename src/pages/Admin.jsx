@@ -10,7 +10,7 @@ import { hu } from 'date-fns/locale';
 
 const Admin = () => {
   const { signOut, user } = useAuth();
-  const [activeTab, setActiveTab] = useState('responses');
+  const [activeTab, setActiveTab] = useState('bookings'); // Alapértelmezett a Konzultációk fül
   const [contentSubTab, setContentSubTab] = useState('services'); // 'services' or 'home'
   const [data, setData] = useState({ sections: [], items: [], trainings: [], responses: [], volumes: [], team: [], prices: [], bookings: [], blockedTimes: [], workingHours: [], reviews: [] });
   const [refresh, setRefresh] = useState(0);
