@@ -139,7 +139,7 @@ serve(async (req) => {
           <strong style="font-size: 18px; color: #111827;">${new Date(record.booking_datetime).toLocaleString('hu-HU')}</strong></p>
         </div>
 
-        <p>Hamarosan jelentkezem a részletekkel. Ha a jelentkezésed elfogadásra kerül, a megbeszéléshez szükséges Zoom linket a következő emailben fogom küldeni.</p>
+        <p>Hamarosan jelentkezem a részletekkel.</p>
         <br/>
         <p>Üdvözlettel,<br><strong>Dr. Polonyi Tünde</strong></p>
       `;
@@ -179,18 +179,18 @@ serve(async (req) => {
         </div>
         <p>Lépj be az Admin felületre a foglalás elfogadásához vagy elutasításához!</p>
         <p style="text-align: center; margin-top: 30px;">
-          <a href="https://soulmindacademy.eu/soulmind-control-2025" target="_blank" rel="noopener noreferrer" style="background-color: #991b1b; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Tovább az Admin felületre</a>
+          <a href="https://www.soulmindacademy.eu/soulmind-control-2025" target="_blank" rel="noopener noreferrer" style="background-color: #991b1b; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Tovább az Admin felületre</a>
         </p>
         <p style="text-align: center; font-size: 12px; color: #6b7280; margin-top: 15px;">
           Ha a fenti gomb nem működik megfelelően, másold be ezt a linket a böngésződbe:<br>
-          <a href="https://soulmindacademy.eu/soulmind-control-2025" style="color: #2563eb;">https://soulmindacademy.eu/soulmind-control-2025</a>
+          <a href="https://www.soulmindacademy.eu/soulmind-control-2025" style="color: #2563eb;">https://www.soulmindacademy.eu/soulmind-control-2025</a>
         </p>
       `;
 
       // 2. Adminnak értesítő email, hogy új foglalás érkezett
       const adminEmailBody = {
         from: 'SoulMind Rendszer <info@soulmindacademy.eu>',
-        to: ['nagydomind@gmail.com'], // Admin e-mail cím
+        to: ['nagydomind@gmail.com', 'soulmindacademy@gmail.com'],  // Admin e-mail cím
         subject: `Új konzultációs foglalás: ${record.first_name} ${record.last_name}`,
         html: createEmailHtml('Új foglalás - Admin Értesítés', adminHtmlContent)
       }
@@ -215,21 +215,14 @@ serve(async (req) => {
       
       const approvedHtmlContent = `
         <h3>Kedves ${record.first_name}!</h3>
-        <p>Örömmel értesítelek, hogy a jelentkezésedet <b>elfogadtam</b> az ingyenes vezetői konzultációra.</p>
+        <p>Örömmel értesítelek, hogy a jelentkezésedet <b>elfogadtuk</b> az ingyenes vezetői konzultációra.</p>
         
         <div class="highlight-box">
           <p style="margin:0;">A megbeszélés időpontja:<br>
           <strong style="font-size: 18px; color: #111827;">${new Date(record.booking_datetime).toLocaleString('hu-HU')}</strong></p>
         </div>
 
-        <p>Kérlek, a fenti időpontban az alábbi Zoom linken csatlakozz majd a megbeszéléshez:</p>
-        
-        <p style="text-align: center; margin: 30px 0;">
-          <a href="https://zoom.us/ide-jon-a-te-sajat-allando-linket" style="background-color: #2563eb; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Csatlakozás a Zoom híváshoz</a>
-        </p>
-        <p style="text-align: center; font-size: 12px; color: #6b7280; word-break: break-all;">
-          Vagy másold be ezt a linket a böngésződbe: <br>https://zoom.us/ide-jon-a-te-sajat-allando-linket
-        </p>
+        <p>A fenti időpontig küldöm neked a Google Meet linket, ahol majd csatlakozni tudsz a megbeszéléshez.</p>
 
         <br/>
         <p>Üdvözlettel,<br><strong>Dr. Polonyi Tünde</strong></p>

@@ -328,7 +328,7 @@ const Jelentkezes = () => {
       <section className="py-24 bg-[#faf8f5]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-[2.5rem] font-bold text-center text-dark mb-14 leading-tight tracking-normal relative inline-block w-full">
-            Képzeld el, hogy már nem az az ember vagy, akit csak a feladatok és a felelősség irányítanak
+            Képzeld el, hogy már nem az az ember vagy, akit csak a felelősség és a feladatok irányítanak
             <div className="w-24 h-1 bg-[#eebf63] mx-auto mt-6 rounded-full"></div>
           </h2>
           
